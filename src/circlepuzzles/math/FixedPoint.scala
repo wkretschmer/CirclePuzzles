@@ -64,7 +64,7 @@ class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
     */
   override def compare(that: FixedPoint): Int = {
     val difference = value.subtract(that.value)
-    difference.setScale(compareScale).signum()
+    difference.setScale(compareScale, roundingMode).signum()
   }
 
   /**
