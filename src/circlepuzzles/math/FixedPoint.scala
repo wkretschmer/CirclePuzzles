@@ -12,10 +12,49 @@ import java.math.{BigDecimal, RoundingMode}
   * `FixedPoint.roundingMode`.
   */
 class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
+  import FixedPoint._
+
+  /**
+    * Computes the sum `this + that`.
+    */
+  def +(that: FixedPoint): FixedPoint = new FixedPoint(value.add(that.value))
+
+  /**
+    * Computes the difference `this - that`.
+    */
+  def -(that: FixedPoint): FixedPoint = new FixedPoint(value.subtract(that.value))
+
+  /**
+    * Computes the product `this * that`.
+    */
+  def *(that: FixedPoint): FixedPoint = new FixedPoint(value.multiply(that.value))
+
+  /**
+    * Computes the quotient `this / that`.
+    */
+  def /(that: FixedPoint): FixedPoint = new FixedPoint(value.divide(that.value, computeScale, roundingMode))
+
+  /**
+    * Computes the absolute value `|this|`
+    */
+  def abs: FixedPoint = new FixedPoint(value.abs())
+
+  /**
+    * Computes the exponent `this ** n`
+    */
+  def pow(n: Int): FixedPoint = new FixedPoint(value.pow(n))
+
+  /**
+    * Computes the negation `-this`.
+    */
+  def unary_- : FixedPoint = new FixedPoint(value.negate())
+
+  // TODO: might want implementations of %, /%, max, min
+
   /**
     * Underlying `BigDecimal` representation.
     */
-  val value = bd.setScale(FixedPoint.computeScale, FixedPoint.roundingMode)
+  val value = bd.setScale(computeScale, roundingMode)
 
   /**
     * Compare this and another `FixedPoint` by computing the difference `this - that` and rounding this difference
@@ -25,7 +64,7 @@ class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
     */
   override def compare(that: FixedPoint): Int = {
     val difference = value.subtract(that.value)
-    difference.setScale(FixedPoint.compareScale).signum()
+    difference.setScale(compareScale).signum()
   }
 
   /**
