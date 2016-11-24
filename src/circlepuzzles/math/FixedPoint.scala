@@ -1,6 +1,8 @@
 package circlepuzzles.math
 
-import java.math.{BigDecimal, RoundingMode}
+import java.math.{BigDecimal, MathContext, RoundingMode}
+
+import org.nevec.rjm.BigDecimalMath
 
 import scala.util.Random
 
@@ -96,7 +98,13 @@ class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
     * `compareValue`.
     * @return A hash code depending only on `compareValue`.
     */
-  override def hashCode(): Int = compareValue.hashCode()
+  override def hashCode: Int = compareValue.hashCode()
+
+  /**
+    * Returns the unrounded string representation of this `FixedPoint` instance.
+    * @return A string representation of this `FixedPoint`.
+    */
+  override def toString: String = value.toString
 }
 
 /**
@@ -135,4 +143,28 @@ object FixedPoint {
     val digits = List.fill(computeScale - compareScale)(Random.nextInt(10))
     new BigDecimal("0." + zeros + digits.mkString)
   }
+
+  /**
+    * `FixedPoint` with value closest to pi.
+    */
+  val Pi = {
+    // Need computeScale + 1 digits because there is 1 digit before the decimal point.
+    val piValue = BigDecimalMath.pi(new MathContext(computeScale + 1, roundingMode))
+    new FixedPoint(piValue)
+  }
+
+  /**
+    * `FixedPoint` with value closest to 2*pi.
+    */
+  val TwoPi = {
+    // Need computeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
+    // end to get the rounding right.
+    val pi = BigDecimalMath.pi(new MathContext(computeScale + 2, roundingMode))
+    new FixedPoint(pi.multiply(new BigDecimal("2")))
+  }
+
+  /**
+    * `FixedPoint` with value 0.
+    */
+  val Zero = new FixedPoint(BigDecimal.ZERO)
 }
