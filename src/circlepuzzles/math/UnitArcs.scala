@@ -1,7 +1,11 @@
 package circlepuzzles.math
 
 /**
-  * Immutable sets of closed, disjoint arcs around the unit circle.
+  * Immutable sets of closed, disjoint, positive length arcs around the unit circle. The arcs represented necessarily
+  * form a perfect set, because the arcs are closed and have no isolated points.
+  *
+  * Note that operations like `union`, `intersection`, and `difference` maintain the perfect set property, so isolated
+  * points in the set are ignored, and isolated points in the complement are part of the set.
   * @param arcs Underlying representation. An entry `(start, present)` that precedes an entry `(end, _)` in the list
   * indicates that this `UnitArcs` contains the points in the closed arc beginning at angle `start` and ending at angle
   * `end`, in radians. The only exception is for the last entry `(last, present)`, which indicates whether the arc from
@@ -67,75 +71,70 @@ class UnitArcs(val arcs: List[(FixedPoint, Boolean)]) {
   }
 
   /**
-    * Helper method for `unionAndDifference`; see that method for a complete description.
+    * Helper method for computing union, intersection, difference, etc. of two arc lists.
     *
     * Note that the boolean parameters are effectively ignored when both lists are nonempty, and the first entries in
-    * both lists have `FixedPoint` value 0. Thus, it makes sense to call `computeUnionDifference(minuend, subtrahend)`
-    * on two arc lists that both start with 0, for example.
-    * @param minuend First list to combine. This is the minuend for the difference computation.
-    * @param subtrahend Second list to combine. This is the subtrahend for the difference computation.
-    * @param minPresent Whether the interval immediately preceding `minuend.first` is present. Defaults to false.
-    * @param subPresent Whether the interval immediately preceding `subtrahend.first` is present. Defaults to false.
-    * @return Pair of arc lists containing the set of arcs in either `minuend` or `subtrahend`, and the set of arcs in
-    * `subtrahend` but not `minuend`. Neither list is simplified.
+    * both lists have the same `FixedPoint` value. Thus, it makes sense to call `merge(keep, arcs1, arcs2)` on two arc
+    * lists that both start with 0, for example.
+    * @param keep A function that decides if an arc belongs in the merge given whether or not it was in the first and
+    * second arc lists.
+    * @param arcs1 First list to combine.
+    * @param arcs2 Second list to combine.
+    * @param arc1Present Whether the arc immediately preceding `arcs1.first` is present. Defaults to false.
+    * @param arc2Present Whether the arc immediately preceding `arcs2.first` is present. Defaults to false.
+    * @return An arc list containing the arcs for which `keep(p1, p2)` evaluates to `true`, where `p1` and `p2`
+    * indicate whether the arc belongs to the first and second arc lists, respectively.
     */
-  private def computeUnionDifference(minuend: ArcList, subtrahend: ArcList,
-                                     minPresent: Boolean = false, subPresent: Boolean = false): (ArcList, ArcList) = {
+  private def merge(keep: (Boolean, Boolean) => Boolean, arcs1: ArcList, arcs2: ArcList,
+                    arc1Present: Boolean = false, arc2Present: Boolean = false): ArcList = {
     // A mergesort-like procedure
     // Here, "F" and "P" refer respectively to the FixedPoint and Boolean in a given ArcList entry
-    (minuend, subtrahend) match {
+    (arcs1, arcs2) match {
       // Both lists nonempty
-      case ((nextMinF, nextMinP) :: restMin, (nextSubF, nextSubP) :: restSub) =>
+      case ((next1F, next1P) :: rest1, (next2F, next2P) :: rest2) =>
         // Add the smaller endpoint, and continue the computation with the smaller endpoint removed from its
         // corresponding list (or from both lists if the endpoints are equal)
-        if(nextMinF < nextSubF) {
-          val (restUnion, restDifference) = computeUnionDifference(restMin, subtrahend, nextMinP, subPresent)
-          val union = (nextMinF, nextMinP || subPresent) :: restUnion
-          val difference = (nextMinF, !nextMinP && subPresent) :: restDifference
-          (union, difference)
+        if(next1F < next2F) {
+          (next1F, keep(next1P, arc2Present)) :: merge(keep, rest1, arcs2, next1P, arc2Present)
         }
-        else if(nextSubF < nextMinF) {
-          val (restUnion, restDifference) = computeUnionDifference(minuend, restSub, minPresent, nextSubP)
-          val union = (nextSubF, minPresent || nextSubP) :: restUnion
-          val difference = (nextSubF, !minPresent && nextSubP) :: restDifference
-          (union, difference)
+        else if(next2F < next1F) {
+          (next2F, keep(arc1Present, next2P)) :: merge(keep, arcs1, rest2, arc1Present, next2P)
         }
         else {
-          val (restUnion, restDifference) = computeUnionDifference(restMin, restSub, nextMinP, nextSubP)
-          val union = (nextMinF, nextMinP || nextSubP) :: restUnion
-          val difference = (nextMinF, !nextMinP && nextSubP) :: restDifference
-          (union, difference)
+          (next1F, keep(next1P, next2P)) :: merge(keep, rest1, rest2, next1P, next2P)
         }
       // Both lists empty
       case (Nil, Nil) =>
-        (Nil, Nil)
-      // Minuend nonempty
+        Nil
+      // First list nonempty
       case (_, Nil) =>
         // Use the fact that presence of the second arc is known for the remainder of the interval (i.e. until 2*pi)
-        val union = minuend.map{case (minF, minP) => (minF, minP || subPresent)}
-        val difference = minuend.map{case (minF, minP) => (minF, !minP && subPresent)}
-        (union, difference)
-      // Subtrahend nonempty
+        arcs1.map{case (next1F, next1P) => (next1F, keep(next1P, arc2Present))}
+      // Second list nonempty
       case (Nil, _) =>
         // Use the fact that presence of the first arc is known for the remainder of the interval (i.e. until 2*pi)
-        val union = subtrahend.map{case (subF, subP) => (subF, minPresent || subP)}
-        val difference = subtrahend.map{case (subF, subP) => (subF, !minPresent && subP)}
-        (union, difference)
+        arcs2.map{case (next2F, next2P) => (next2F, keep(arc1Present, next2P))}
     }
   }
 
   /**
-    * Compute the union and difference of this set of arcs with another set of arcs. The union consists of all arc
-    * segments that belong to either set. The difference consists of all arc segments that belong to `this` but not
-    * `that`.
-    *
-    * In both cases, the closure is returned. For example, if `this` contains a segment `[a,b]` and `that` contains a
-    * segment `[b,c]`, the union will contain `[a,c]`.
+    * Compute the difference with another set of arcs.
     * @param that Arc set with which to combine.
-    * @return A pair (union, difference) of arc sets as described above.
+    * @return An arc set containing the points that exist in `this` but not `that`.
     */
-  def unionAndDifference(that: UnitArcs): (UnitArcs, UnitArcs) = {
-    val (union, difference) = computeUnionDifference(arcs, that.arcs)
-    (new UnitArcs(simplify(union)), new UnitArcs(simplify(difference)))
-  }
+  def difference(that: UnitArcs): UnitArcs = new UnitArcs(simplify(merge(_ && !_, arcs, that.arcs)))
+
+  /**
+    * Compute the intersection with another set of arcs.
+    * @param that Arc set with which to combine.
+    * @return An arc set containing the points that exist in both `this` and `that`.
+    */
+  def intersection(that: UnitArcs): UnitArcs = new UnitArcs(simplify(merge(_ && _, arcs, that.arcs)))
+
+  /**
+    * Compute the union with another set of arcs.
+    * @param that Arc set with which to combine.
+    * @return An arc set containing the points that exist in either `this` or `that`.
+    */
+  def union(that: UnitArcs): UnitArcs = new UnitArcs(simplify(merge(_ || _, arcs, that.arcs)))
 }
