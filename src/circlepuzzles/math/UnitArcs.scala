@@ -61,7 +61,8 @@ class UnitArcs(val arcs: List[(FixedPoint, Boolean)]) {
     */
   def rotate(angle: FixedPoint): UnitArcs = {
     val rotated = arcs.map{case (f, p) => (f + angle, p)}
-    // Arcs that start after 2*pi need to wrap around
+    // Arcs that begin after 2*pi need to wrap around
+    // Thus, arcs in start don't wrap, and arcs in end do
     val (start, end) = rotated.span{case (f, p) => f < FixedPoint.TwoPi}
     val wrapped = end.map{case (f, p) => (f - FixedPoint.TwoPi, p)}
     val combined = wrapped ::: start
@@ -137,4 +138,28 @@ class UnitArcs(val arcs: List[(FixedPoint, Boolean)]) {
     * @return An arc set containing the points that exist in either `this` or `that`.
     */
   def union(that: UnitArcs): UnitArcs = new UnitArcs(simplify(merge(_ || _, arcs, that.arcs)))
+}
+
+object UnitArcs {
+  /**
+    * A single arc about the whole unit circle.
+    */
+  val FullCircle = new UnitArcs(List((FixedPoint.Zero, true)))
+
+  /**
+    * An empty arc about the unit circle.
+    */
+  val Empty = new UnitArcs(List((FixedPoint.Zero, false)))
+
+  /**
+    * Creates an arc about the unit circle starting counterclockwise from the given start position with the given arc
+    * length.
+    * @param start Angle in radians at which this arc begins. Requires `0 <= start < 2*pi`.
+    * @param length Arc length of this arc. Requires `0 < length < 2*pi`.
+    * @return An arc constructed counterclockwise from the specified start and length parameters.
+    */
+  def apply(start: FixedPoint, length: FixedPoint): UnitArcs = {
+    val unrotated = new UnitArcs(List((FixedPoint.Zero, true), (length, false)))
+    unrotated.rotate(start)
+  }
 }
