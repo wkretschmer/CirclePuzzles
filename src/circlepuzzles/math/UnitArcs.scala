@@ -56,11 +56,13 @@ class UnitArcs(val arcs: List[(FixedPoint, Boolean)]) {
 
   /**
     * Rotate all contained arcs around the origin.
-    * @param angle Counterclockwise rotation angle in radians. Requires `0 <= angle < 2*pi`.
+    * @param angle Counterclockwise rotation angle in radians.
     * @return `UnitArcs` resulting from a rotation by the angle specified.
     */
   def rotate(angle: FixedPoint): UnitArcs = {
-    val rotated = arcs.map{case (f, p) => (f + angle, p)}
+    // Normalize to range [0,2*pi)
+    val normalizedAngle = FixedPoint.mod2Pi(angle)
+    val rotated = arcs.map{case (f, p) => (f + normalizedAngle, p)}
     // Arcs that begin after 2*pi need to wrap around
     // Thus, arcs in start don't wrap, and arcs in end do
     val (start, end) = rotated.span{case (f, p) => f < FixedPoint.TwoPi}
@@ -154,7 +156,7 @@ object UnitArcs {
   /**
     * Creates an arc about the unit circle starting counterclockwise from the given start position with the given arc
     * length.
-    * @param start Angle in radians at which this arc begins. Requires `0 <= start < 2*pi`.
+    * @param start Angle in radians at which this arc begins.
     * @param length Arc length of this arc. Requires `0 < length < 2*pi`.
     * @return An arc constructed counterclockwise from the specified start and length parameters.
     */
