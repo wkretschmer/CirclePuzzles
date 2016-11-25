@@ -179,8 +179,7 @@ object FixedPoint {
     * @return The arc cosine of the argument in the range [0,pi].
     */
   def acos(theta: FixedPoint): FixedPoint = {
-    val result = BigDecimalMath.acos(theta.value)
-    new FixedPoint(result)
+    new FixedPoint(BigDecimalMath.acos(theta.value))
   }
 
   /**
@@ -224,8 +223,7 @@ object FixedPoint {
     * @return Equivalent angle in the range [0,2pi).
     */
   def mod2Pi(theta: FixedPoint): FixedPoint = {
-    val result = BigDecimalMath.mod2pi(theta.value)
-    new FixedPoint(result)
+    new FixedPoint(BigDecimalMath.mod2pi(theta.value))
   }
 
   /**
@@ -236,7 +234,24 @@ object FixedPoint {
     */
   def sqrt(x: FixedPoint): FixedPoint = {
     // ArithmeticException is thrown by BigDecimalMath
-    val result = BigDecimalMath.sqrt(x.value)
-    new FixedPoint(result)
+    new FixedPoint(BigDecimalMath.sqrt(x.value))
+  }
+
+  /**
+    * Computes the sine of the argument.
+    * @param theta Angle whose sine is to be computed, in radians.
+    * @return Sine of the argument.
+    */
+  def sin(theta: FixedPoint): FixedPoint = {
+    new FixedPoint(BigDecimalMath.sin(theta.value))
+  }
+
+  /**
+    * Computes the cosine of the argument.
+    * @param theta Angle whose cosine is to be computed, in radians.
+    * @return Cosine of the argument.
+    */
+  def cos(theta: FixedPoint): FixedPoint = {
+    new FixedPoint(BigDecimalMath.cos(theta.value))
   }
 }
