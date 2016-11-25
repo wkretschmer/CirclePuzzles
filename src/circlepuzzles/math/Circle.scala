@@ -42,4 +42,21 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
       UnitArcs(angleToCenter - halfTheta, halfTheta * FixedPoint.Two)
     }
   }
+
+  /**
+    * Compute the rotation of this circle about an arbitrary point in the plane.
+    * @param rx X-coordinate of rotation center.
+    * @param ry Y-coordinate of rotation center.
+    * @param angle Rotation angle, in radians.
+    * @return The rotation of this circle about the specified point by the specified angle.
+    */
+  def rotate(rx: FixedPoint, ry: FixedPoint, angle: FixedPoint): Circle = {
+    val dx = x - rx
+    val dy = y - ry
+    val cos = FixedPoint.cos(angle)
+    val sin = FixedPoint.sin(angle)
+    val newdx = cos * dx - sin * dy
+    val newdy = sin * dx + cos * dy
+    Circle(rx + newdx, ry + newdy, radius)
+  }
 }
