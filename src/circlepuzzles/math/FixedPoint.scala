@@ -223,7 +223,12 @@ object FixedPoint {
     * @return Equivalent angle in the range [0,2pi).
     */
   def mod2Pi(theta: FixedPoint): FixedPoint = {
-    new FixedPoint(BigDecimalMath.mod2pi(theta.value))
+    // We can't use BigDecimalMath here because a FixedPoint could compare as equal to TwoPi despite having an
+    // underlying representation that is strictly less than 2*pi
+    var result = theta
+    while(result < Zero) result += TwoPi
+    while(result >= TwoPi) result -= TwoPi
+    result
   }
 
   /**
