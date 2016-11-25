@@ -140,6 +140,12 @@ class UnitArcs(val arcs: List[(FixedPoint, Boolean)]) {
     * @return An arc set containing the points that exist in either `this` or `that`.
     */
   def union(that: UnitArcs): UnitArcs = new UnitArcs(simplify(merge(_ || _, arcs, that.arcs)))
+
+  /**
+    * Tests if this contains any arcs.
+    * @return `true` if and only if `this` contains at least one arc.
+    */
+  def nonEmpty: Boolean = arcs.exists(_._2)
 }
 
 object UnitArcs {
