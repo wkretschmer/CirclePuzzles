@@ -167,4 +167,76 @@ object FixedPoint {
     * `FixedPoint` with value 0.
     */
   val Zero = new FixedPoint(BigDecimal.ZERO)
+
+  /**
+    * `FixedPoint` with value 2.
+    */
+  val Two = new FixedPoint(new BigDecimal("2"))
+
+  /**
+    * Computes the angle whose cosine equals the argument.
+    * @param theta Value whose arc cosine is to be returned. Requires `-1 <= theta <= 1`.
+    * @return The arc cosine of the argument in the range [0,pi].
+    */
+  def acos(theta: FixedPoint): FixedPoint = {
+    val result = BigDecimalMath.acos(theta.value)
+    new FixedPoint(result)
+  }
+
+  /**
+    * Computes the angle theta whose tangent equals the ratio `y / x` and is in the same quadrant as `(y, x)`.
+    * @param y Y-coordinate.
+    * @param x X-coordinate.
+    * @return The two argument arc tangent of `y` and `x`.
+    * @throws ArithmeticException If `y` and `x` are both zero.
+    */
+  def atan2(y: FixedPoint, x: FixedPoint): FixedPoint = {
+    // See Wikipedia "Inverse trigonometric functions" on computing atan2 in terms of atan
+    val signX = x.compare(Zero)
+    if(signX > 0) { // x positive
+      new FixedPoint(BigDecimalMath.atan((y / x).value))
+    }
+    else if(signX < 0) { // x negative
+      if(y >= Zero) {
+        new FixedPoint(BigDecimalMath.atan((y / x).value)) + Pi
+      }
+      else {
+        new FixedPoint(BigDecimalMath.atan((y / x).value)) - Pi
+      }
+    }
+    else { // x zero
+      val signY = y.compare(Zero)
+      if(signY > 0) {
+        Pi / Two
+      }
+      else if(signY < 0) {
+        -Pi / Two
+      }
+      else {
+        throw new ArithmeticException("atan2(0,0)")
+      }
+    }
+  }
+
+  /**
+    * Normalizes the angle to be in the range [0,2pi).
+    * @param theta Angle to normalize, in radians.
+    * @return Equivalent angle in the range [0,2pi).
+    */
+  def mod2Pi(theta: FixedPoint): FixedPoint = {
+    val result = BigDecimalMath.mod2pi(theta.value)
+    new FixedPoint(result)
+  }
+
+  /**
+    * Computes the square root of the argument.
+    * @param x Nonnegative argument whose square root is to be computed.
+    * @return Nonnegative square root of the argument.
+    * @throws ArithmeticException If `x` is negative.
+    */
+  def sqrt(x: FixedPoint): FixedPoint = {
+    // ArithmeticException is thrown by BigDecimalMath
+    val result = BigDecimalMath.sqrt(x.value)
+    new FixedPoint(result)
+  }
 }
