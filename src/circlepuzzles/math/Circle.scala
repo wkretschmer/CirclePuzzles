@@ -33,7 +33,7 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
       }
     }
     else {
-      // The cosine of half of the arc length of the intersection; follows from law of cosines
+      // The cosine of half of the angle that spans the intersection; follows from law of cosines
       val cosHalfTheta = (distSquared + radius.pow(2) - that.radius.pow(2)) / (FixedPoint.Two * radius * dist)
       val halfTheta = FixedPoint.acos(cosHalfTheta).abs
       // Compute the angle to the center of the other circle
