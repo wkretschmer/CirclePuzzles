@@ -17,7 +17,7 @@ package circlepuzzles.math
   * to say that it contains no duplicate `FixedPoint`s.
   *
   * A desirable (but not strictly necessary) property is for the list to alternate between present and non-present arcs.
-  * Such a list is called "simplified". All methods that return UnitArcs will simplify their results.
+  * Such a list is called "simplified". All methods that return `UnitArcs` will simplify their results.
   */
 class UnitArcs(val arcs: List[(FixedPoint, Boolean)]) {
   /**
@@ -86,7 +86,8 @@ class UnitArcs(val arcs: List[(FixedPoint, Boolean)]) {
     * @param arc1Present Whether the arc immediately preceding `arcs1.first` is present. Defaults to false.
     * @param arc2Present Whether the arc immediately preceding `arcs2.first` is present. Defaults to false.
     * @return An arc list containing the arcs for which `keep(p1, p2)` evaluates to `true`, where `p1` and `p2`
-    * indicate whether the arc belongs to the first and second arc lists, respectively.
+    * indicate whether the arc belongs to the first and second arc lists, respectively. The arc list is not simplified;
+    * it contains all endpoints that belong to either list.
     */
   private def merge(keep: (Boolean, Boolean) => Boolean, arcs1: ArcList, arcs2: ArcList,
                     arc1Present: Boolean = false, arc2Present: Boolean = false): ArcList = {
@@ -146,6 +147,60 @@ class UnitArcs(val arcs: List[(FixedPoint, Boolean)]) {
     * @return `true` if and only if `this` contains at least one arc.
     */
   def nonEmpty: Boolean = arcs.exists(_._2)
+
+  /**
+    * Turn this abstract set of arcs into explicit `(start, end)` pairs of arcs that are contained in this instance.
+    * Such a pair starts at `start` and sweeps in the counterclockwise direction until `end`. If `start == end`, this
+    * indicates the presence of a complete circle.
+    *
+    * Arcs are also split at the specified list of points. For example, if this instance contains all points in the
+    * range [1,3] and `List(2)` is given as input, the pairs `(1, 2)` and `(2, 3)` will be returned. If this `UnitArcs`
+    * instance is not simplified, any extra endpoints will also be included as splitting points.
+    * @param splits A sorted list of split angles without duplicates. All entries must be in the range [0,2*pi).
+    * @return A list of `(start, end)` pairs representing arcs in this instance that have been split at the given
+    * points. The list is not guaranteed to be sorted in any particular way.
+    */
+  def splitAtIntersections(splits: List[FixedPoint]): List[(FixedPoint, FixedPoint)] = {
+    // Get split arc list using merge, which "unsimplifies" the list by introducing additional points that do nothing
+    // Our keep function just ignores the second list
+    val splitArcs = merge((fst, snd) => fst, arcs, splits.map(i => (i, false)))
+
+    // Helper function for turning an arc list into explicit (start, end) arcs
+    // It takes as input a tail of splitArcs (so by assumption, arcList does not include 0)
+    // This function will also merge the last and first arcs if necessary
+    def makeArcs(arcList: ArcList): List[(FixedPoint, FixedPoint)] = {
+      arcList match {
+        // Have two endpoints
+        case (start, present) :: (end, _) :: rest =>
+          // Add the arc between the endpoints if it is present
+          if(present) (start, end) :: makeArcs(arcList.tail)
+          // Otherwise process the rest of the list
+          else makeArcs(arcList.tail)
+        // Have just one endpoint; the other endpoint is the implicit wrap around to 0
+        case (start, present) :: Nil =>
+          // The last arc and the first arc merge if both are present, and 0 was not a split point
+          if(present && splitArcs.head._2 && splits.head != FixedPoint.Zero) {
+            // It is safe to call splitArcs(1) because the fact that we got here means splitArcs.tail.size >= 1
+            List((start, splitArcs(1)._1))
+          }
+          // Otherwise, the two arcs remain separate
+          else {
+            // This is the least ugly way to produce a list of between zero and two elements depending on if the arcs
+            // are present
+            val lastArcOption = if(present) Some((start, FixedPoint.Zero)) else None
+            val firstArcOption = if(splitArcs.head._2) Some((FixedPoint.Zero, splitArcs(1)._1)) else None
+            List(lastArcOption, firstArcOption).flatten
+          }
+        // Notice that the only way we get Nil is if splitArcs.size == 1
+        case Nil =>
+          // We either have a full circle or no arcs
+          if(splitArcs.head._2) List((FixedPoint.Zero, FixedPoint.Zero))
+          else Nil
+      }
+    }
+
+    makeArcs(splitArcs.tail)
+  }
 }
 
 object UnitArcs {
