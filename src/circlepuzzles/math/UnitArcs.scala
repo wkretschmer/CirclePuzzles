@@ -149,6 +149,25 @@ class UnitArcs(val arcs: List[(FixedPoint, Boolean)]) {
   def nonEmpty: Boolean = arcs.exists(_._2)
 
   /**
+    * Tests if this contains the given angle.
+    * @param angle An angle in the range [0,2*pi).
+    * @return `true` if and only if the angle belongs to one of the arcs in this instance.
+    */
+  def contains(angle: FixedPoint): Boolean = {
+    val (lessThan, greaterThanOrEqual) = arcs.span(_._1 < angle)
+    // If angle is contained in arcs as an endpoint, then the angle is in the set if either adjacent arc is present
+    // Note: this covers the case where angle is zero
+    if(greaterThanOrEqual.nonEmpty && greaterThanOrEqual.head._1 == angle) {
+      // lessThan is empty if and only if the angle is zero
+      // In this case, the "previous" arc is actually the last arc in the list (i.e. we wrap around)
+      greaterThanOrEqual.head._2 || lessThan.lastOption.getOrElse(arcs.last)._2
+    }
+    // Otherwise, the angle is positive and belongs to the last arc that starts before it
+    // Because the angle is positive, lessThan is nonempty
+    else lessThan.last._2
+  }
+
+  /**
     * Turn this abstract set of arcs into explicit `(start, end)` pairs of arcs that are contained in this instance.
     * Such a pair starts at `start` and sweeps in the counterclockwise direction until `end`. If `start == end`, this
     * indicates the presence of a complete circle.
