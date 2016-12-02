@@ -164,6 +164,16 @@ object FixedPoint {
   }
 
   /**
+    * `FixedPoint` with value closest to 3*pi/2.
+    */
+  val ThreeHalvesPi = {
+    // Need computeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
+    // end to get the rounding right.
+    val piValue = BigDecimalMath.pi(new MathContext(computeScale + 2, roundingMode))
+    new FixedPoint(piValue.multiply(new BigDecimal("1.5")))
+  }
+
+  /**
     * `FixedPoint` with value closest to 2*pi.
     */
   val TwoPi = {
@@ -177,6 +187,11 @@ object FixedPoint {
     * `FixedPoint` with value 0.
     */
   val Zero = new FixedPoint(BigDecimal.ZERO)
+
+  /**
+    * `FixedPoint` with value 1.
+    */
+  val One = new FixedPoint(BigDecimal.ONE)
 
   /**
     * `FixedPoint` with value 2.
@@ -262,19 +277,31 @@ object FixedPoint {
 
   /**
     * Computes the sine of the argument.
+    *
+    * Warning: this implementation is bugged for similar reasons to `acos`. This may throw an `IllegalArgumentException`
+    * on inputs very close to multiples of pi/2, but has special cases for `FixedPoint`s that compare as equal to a
+    * multiple of pi/2.
     * @param theta Angle whose sine is to be computed, in radians.
     * @return Sine of the argument.
     */
   def sin(theta: FixedPoint): FixedPoint = {
-    new FixedPoint(BigDecimalMath.sin(theta.value))
+    val normalized = mod2Pi(theta)
+    if(normalized == Zero || normalized == Pi) Zero
+    else if(normalized == HalfPi) One
+    else if(normalized == ThreeHalvesPi) -One
+    else new FixedPoint(BigDecimalMath.sin(theta.value))
   }
 
   /**
     * Computes the cosine of the argument.
+    *
+    * Warning: this implementation is bugged for similar reasons to `acos`. This may throw an `IllegalArgumentException`
+    * on inputs very close to multiples of pi/2, but has special cases for `FixedPoint`s that compare as equal to a
+    * multiple of pi/2.
     * @param theta Angle whose cosine is to be computed, in radians.
     * @return Cosine of the argument.
     */
   def cos(theta: FixedPoint): FixedPoint = {
-    new FixedPoint(BigDecimalMath.cos(theta.value))
+    sin(theta + HalfPi)
   }
 }
