@@ -145,6 +145,16 @@ object FixedPoint {
   }
 
   /**
+    * `FixedPoint` with value closest to pi/2.
+    */
+  val HalfPi = {
+    // Need computeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
+    // end to get the rounding right.
+    val piValue = BigDecimalMath.pi(new MathContext(computeScale + 2, roundingMode))
+    new FixedPoint(piValue.divide(new BigDecimal("2"), computeScale, roundingMode))
+  }
+
+  /**
     * `FixedPoint` with value closest to pi.
     */
   val Pi = {
@@ -159,8 +169,8 @@ object FixedPoint {
   val TwoPi = {
     // Need computeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
     // end to get the rounding right.
-    val pi = BigDecimalMath.pi(new MathContext(computeScale + 2, roundingMode))
-    new FixedPoint(pi.multiply(new BigDecimal("2")))
+    val piValue = BigDecimalMath.pi(new MathContext(computeScale + 2, roundingMode))
+    new FixedPoint(piValue.multiply(new BigDecimal("2")))
   }
 
   /**
@@ -212,10 +222,10 @@ object FixedPoint {
     else { // x zero
       val signY = y.compare(Zero)
       if(signY > 0) {
-        Pi / Two
+        HalfPi
       }
       else if(signY < 0) {
-        -Pi / Two
+        -HalfPi
       }
       else {
         throw new ArithmeticException("atan2(0,0)")
