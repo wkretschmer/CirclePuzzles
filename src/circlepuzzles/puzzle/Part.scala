@@ -91,9 +91,10 @@ class Part(boundary: List[Arc]) {
         val actualMidAngle =
           if(arc.end > arc.start) middleAngle
           else FixedPoint.mod2Pi(middleAngle + FixedPoint.Pi)
-        val x = arc.circle.x + FixedPoint.cos(actualMidAngle)
-        val y = arc.circle.y + FixedPoint.sin(actualMidAngle)
-        circle.strictlyContains(x, y)
+        val x = arc.circle.x + arc.circle.radius * FixedPoint.cos(actualMidAngle)
+        val y = arc.circle.y + arc.circle.radius * FixedPoint.sin(actualMidAngle)
+        val result = circle.strictlyContains(x, y)
+        result
       }
     }
     // Otherwise, the boundary set contains just one arc. We just test that the other circle contains the boundary arc,
