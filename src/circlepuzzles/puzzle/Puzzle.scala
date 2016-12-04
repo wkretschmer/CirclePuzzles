@@ -20,19 +20,14 @@ class Puzzle(val moves: Set[Move]) {
   type CutSet = Map[Circle, UnitArcs]
 
   /**
-    * A mutable version of `CutSet`.
-    */
-  type MutableCutSet = mutable.Map[Circle, UnitArcs]
-
-  /**
-    * Add the cuts specified by the given `Circle` and `UnitArcs` to the given `MutableCutSet`. This works by setting
+    * Add the cuts specified by the given `Circle` and `UnitArcs` to the given mutable cut set. This works by setting
     * `cuts(circle)` equal to the union of `cuts(circle)` and `arcs`.
     * @param circle `Circle` to which the added cuts belong.
     * @param arcs `UnitArcs` describing the cuts around the given circle.
-    * @param cuts `MutableCutSet` to which the cuts are to be added.
-    * @return `UnitArcs` that previously existed in the `MutableCutSet` at the specified `Circle`.
+    * @param cuts Mutable cut set to which the cuts are to be added.
+    * @return `UnitArcs` that previously existed in the mutable cut set at the specified `Circle`.
     */
-  private def add(circle: Circle, arcs: UnitArcs, cuts: MutableCutSet): UnitArcs = {
+  private def add(circle: Circle, arcs: UnitArcs, cuts: mutable.Map[Circle, UnitArcs]): UnitArcs = {
     cuts.get(circle) match {
       case None =>
         cuts.put(circle, arcs)
@@ -44,13 +39,12 @@ class Puzzle(val moves: Set[Move]) {
   }
 
   /**
-    * Computes the set of cuts that split pieces in this puzzle. Equivalently, this computes all of the possible images
-    * of the move `Circle`s under the action of rotation by `Move`s in `moves`.
+    * The set of cuts that split pieces in this puzzle. Equivalently, this is the set of all of the possible images of
+    * the move `Circle`s under the action of rotation by `Move`s in `moves`.
     *
     * This may not terminate for infinite puzzles (i.e. puzzles that jumble).
-    * @return The set of all cuts that exist in a full unbandaging of this puzzle.
     */
-  def cutSet: CutSet = {
+  lazy val cutSet: CutSet = {
     val movesList = moves.toList
     // Start with one complete cut for each move's circle
     val allCuts = mutable.Map(movesList.map(move => (move.circle, UnitArcs.FullCircle)):_*)
@@ -93,15 +87,13 @@ class Puzzle(val moves: Set[Move]) {
   }
 
   /**
-    * Computes the set of cuts in this puzzle as a list of individual arcs that start and end at intersections with
-    * other arcs.
-    * @return An iterable over all individual cut arcs in a full unbandaging of this puzzle.
+    * The set of cuts in this puzzle as an iterable over individual arcs that start and end at intersections with other
+    * arcs. These are the arcs in a full unbandaging of this puzzle.
     */
-  def cutsAsArcs: Iterable[Arc] = {
-    val cuts = cutSet
-    val cutsByCircle = for((circle, arcs) <- cuts) yield {
+  lazy val cutsAsArcs: Iterable[Arc] = {
+    val cutsByCircle = for((circle, arcs) <- cutSet) yield {
       // Compute the set of possible intersections with other circles as angles around this circle
-      val allIntersections = for((otherCircle, otherArcs) <- cuts ;
+      val allIntersections = for((otherCircle, otherArcs) <- cutSet ;
                                  // Iterate through the 0, 1, or 2 intersections
                                  (angle, otherAngle) <- circle.intersections(otherCircle)
                                  // Only care about intersections that actually exist in the other circle
@@ -117,14 +109,13 @@ class Puzzle(val moves: Set[Move]) {
   }
 
   /**
-    * Computes the parts in this puzzle. The infinite exterior is included as one of these parts.
+    * The parts in this puzzle. The infinite exterior is included as one of these parts.
     *
-    * Note: this method assumes that the boundary of all parts are nonintersecting continuous loops in the plane. This
+    * Note: this assumes that the boundary of all parts are nonintersecting continuous loops in the plane. This
     * assumption may be violated for puzzles that have disconnected moves, i.e. moves between which parts cannot be
     * exchanged.
-    * @return A list of all individual parts in this puzzle.
     */
-  def parts: List[Part] = {
+  lazy val parts: List[Part] = {
     // Map each arc intersection point to the set of arcs that start or end there. This is basically a graph where the
     // vertices are arc intersections and the edges are (Arc, Boolean) pairs where the boolean value is true if and only
     // if the arc starts at that vertex. Thus, a single TreeSet in the map is basically an adjacency list for the
