@@ -1,5 +1,8 @@
 package circlepuzzles.puzzle
 
+import java.util
+import java.util.Comparator
+
 import circlepuzzles.math._
 
 import scala.collection.mutable
@@ -111,5 +114,97 @@ class Puzzle(val moves: Set[Move]) {
       for((start, end) <- concreteArcs) yield Arc(circle, start, end)
     }
     cutsByCircle.flatten
+  }
+
+  /**
+    * Computes the parts in this puzzle. The infinite exterior is included as one of these parts.
+    *
+    * Note: this method assumes that the boundary of all parts are nonintersecting continuous loops in the plane. This
+    * assumption may be violated for puzzles that have disconnected moves, i.e. moves between which parts cannot be
+    * exchanged.
+    * @return A list of all individual parts in this puzzle.
+    */
+  def parts: List[Part] = {
+    // Map each arc intersection point to the set of arcs that start or end there. This is basically a graph where the
+    // vertices are arc intersections and the edges are (Arc, Boolean) pairs where the boolean value is true if and only
+    // if the arc starts at that vertex. Thus, a single TreeSet in the map is basically an adjacency list for the
+    // corresponding point of intersection. The arcs around a single vertex are sorted in such a way that any two
+    // adjacent sorted arcs belong to the same part. The ordering implicitly wraps around.
+    val arcsByIntersection = mutable.Map[(FixedPoint, FixedPoint), util.TreeSet[(Arc, Boolean)]]()
+    // Comparator for sorting arcs around a single intersection point
+    val comparator = new Comparator[(Arc, Boolean)] {
+      override def compare(a1: (Arc, Boolean), a2: (Arc, Boolean)): Int = {
+        val (arc1, arc1StartsHere) = a1
+        val (arc2, arc2StartsHere) = a2
+
+        // First compute the angle of the line tangent to both arcs in the direction along the arc away from the
+        // intersection point. Whether we add or subtract pi/2 depends on whether the arc starts or ends here.
+        val arc1Angle = if(arc1StartsHere) FixedPoint.mod2Pi(arc1.start + FixedPoint.HalfPi)
+                        else FixedPoint.mod2Pi(arc1.end - FixedPoint.HalfPi)
+        val arc2Angle = if(arc2StartsHere) FixedPoint.mod2Pi(arc2.start + FixedPoint.HalfPi)
+                        else FixedPoint.mod2Pi(arc2.end - FixedPoint.HalfPi)
+
+        // If the angles are not the same, then order by whichever comes first in a counterclockwise direction
+        val angleCompare = arc1Angle.compare(arc2Angle)
+        if(angleCompare != 0) angleCompare
+        // Otherwise, the arcs leave at the same angle, so we sort by some casework. This essentially sorts according to
+        // the curvature of the arcs. It is more clear why this works if one draws a picture.
+        else (arc1StartsHere, arc2StartsHere) match {
+          // Among arcs that start here, the circle with smaller radius is considered larger
+          case (true, true) => arc2.circle.radius.compare(arc1.circle.radius)
+          // Among arcs that end here, the circle with greater radius is considered larger
+          case (false, false) => arc1.circle.radius.compare(arc2.circle.radius)
+          // Otherwise, the circle that starts here is considered larger
+          case (true, false) => 1
+          case (false, true) => -1
+        }
+      }
+    }
+    // Makes an empty sorted set with the comparator
+    def makeSortedSet = new util.TreeSet[(Arc, Boolean)](comparator)
+    for(arc <- cutsAsArcs) {
+      // Make an empty sorted set of arcs for both intersections if they don't exist already, then add the arc to the
+      // adjacency sets of both endpoints.
+      arcsByIntersection.getOrElseUpdate(arc.startPoint, makeSortedSet).add((arc, true))
+      arcsByIntersection.getOrElseUpdate(arc.endPoint, makeSortedSet).add((arc, false))
+    }
+
+    // Collect all parts in a single list
+    var allParts = List[Part]()
+    // Repeat while there exists a nonempty adjacency list, which implies there exists an edge that hasn't been added to
+    // a part yet
+    var next = arcsByIntersection.find(!_._2.isEmpty)
+    while(next.nonEmpty) {
+      val (startPoint, arcs) = next.get
+      // It doesn't actually matter that we choose the first arc here
+      val startArc = arcs.first()
+
+      // Build up the part by collecting adjacent arcs that belong to its boundary until we loop back around to the
+      // start vertex. This is where we use the fact that the adjacency lists are sorted.
+      def makePartBoundary(currentArc: (Arc, Boolean)): List[Arc] = {
+        val (arc, startedAtPrevious) = currentArc
+        // Remove the arc from the previous adjacency list. Notice: we only remove the arc from one (not both) of its
+        // endpoints. This is because each arc belongs to exactly two pieces, and we get the two pieces by traversing
+        // once in each direction. The direction in which we traverse the arc determines which piece the arc belongs to.
+        val previousPoint = if(startedAtPrevious) arc.startPoint else arc.endPoint
+        arcsByIntersection(previousPoint).remove(currentArc)
+
+        val nextPoint = if(startedAtPrevious) arc.endPoint else arc.startPoint
+        // Stop if we returned to the start point of this part's boundary
+        if(nextPoint == startPoint) List(arc)
+        else {
+          val nextPointArcs = arcsByIntersection(nextPoint)
+          // This is where we loop around the ordering. If there is no next element, the next element is actually the
+          // first element.
+          val nextArc = Option(nextPointArcs.higher((arc, !startedAtPrevious))).getOrElse(nextPointArcs.first())
+          arc :: makePartBoundary(nextArc)
+        }
+      }
+
+      val boundary = makePartBoundary(startArc)
+      allParts ::= new Part(boundary)
+      next = arcsByIntersection.find(!_._2.isEmpty)
+    }
+    allParts
   }
 }
