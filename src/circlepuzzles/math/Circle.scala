@@ -121,4 +121,16 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
     val newdy = sinAngle * dx + cosAngle * dy
     Circle(rx + newdx, ry + newdy, radius)
   }
+
+  /**
+    * Tests if this circle strictly contains `(xx, yy)`.
+    * @param xx X-coordinate of point.
+    * @param yy Y-coordinate of point.
+    * @return True if and only if the point specified by the arguments is in the interior of this circle.
+    */
+  def strictlyContains(xx: FixedPoint, yy: FixedPoint): Boolean = {
+    val dx = x - xx
+    val dy = y - yy
+    dx.pow(2) + dy.pow(2) < radius.pow(2)
+  }
 }
