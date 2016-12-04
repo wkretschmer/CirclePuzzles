@@ -7,10 +7,10 @@ import scala.collection.mutable
 
 /**
   * Parts on circle puzzles with boundaries that form nonintersecting continuous loops in the plane.
-  * @param boundary All arcs in the boundary of this part. This list must be ordered, in the sense that adjacent arcs in
-  * the list must share an endpoint. The list must also loop around (i.e the last arc must share an endpoint with the
-  * first arc). However, this list does not need to be simplified. For example, there can be adjacent arcs in the list
-  * around the same circle.
+  * @param boundary Nonempty list of all arcs in the boundary of this part. This list must be ordered, in the sense that
+  * adjacent arcs in the list must share an endpoint. The list must also loop around (i.e the last arc must share an
+  * endpoint with the first arc). However, this list does not need to be simplified. For example, there can be adjacent
+  * arcs in the list around the same circle.
   */
 class Part(boundary: List[Arc]) {
   /**
@@ -65,6 +65,63 @@ class Part(boundary: List[Arc]) {
     * The set of arcs in the simplified boundary. Two parts are equal if and only if this field is equal.
     */
   val boundarySet = simplifiedBoundary.toSet
+
+  /**
+    * Tests if the given circle rotates this part. This may return an incorrect answer if the part was not cut by the
+    * given circle.
+    * @param circle A circle that specifies a center of rotation and radius.
+    * @return True if and only if the given circle rotates this part.
+    */
+  def rotatedBy(circle: Circle): Boolean = {
+    // If the boundary of the part has at least 3 endpoints, then they can't all belong to the boundary of the circle
+    // because then they would be combined. In that case, assuming this part was split by the circle, this part must
+    // have one endpoint strictly contained in the circle.
+    if(boundarySet.size >= 3) {
+      boundarySet.exists{arc =>
+        val (x, y) = arc.startPoint
+        circle.strictlyContains(x, y)
+      }
+    }
+    // Otherwise, it is possible that the boundary set contains just two arcs, in which case both endpoints could be on
+    // the boundary of this circle. We get around this by looking at the midpoints of the two arcs.
+    else if(boundarySet.size == 2) {
+      boundarySet.exists{arc =>
+        val middleAngle = (arc.start + arc.end) / FixedPoint.Two
+        // We add pi to get the actual mid angle if the arc wraps around zero
+        val actualMidAngle =
+          if(arc.end > arc.start) middleAngle
+          else FixedPoint.mod2Pi(middleAngle + FixedPoint.Pi)
+        val x = arc.circle.x + FixedPoint.cos(actualMidAngle)
+        val y = arc.circle.y + FixedPoint.sin(actualMidAngle)
+        circle.strictlyContains(x, y)
+      }
+    }
+    // Otherwise, the boundary set contains just one arc. We just test that the other circle contains the boundary arc,
+    // because we assume that the set is nonempty, and that arc was cut by the circle.
+    else {
+      val arc = boundarySet.head
+      arc.circle.radius < circle.radius && circle.strictlyContains(arc.circle.x, arc.circle.y)
+    }
+  }
+
+  /**
+    * Computes the image of this part under the given move. This may return an incorrect answer if the part was not cut
+    * by the move's circle.
+    * @param move Move by which to rotate.
+    * @return The image of this part under rotation by the given move, or `this` if the move does not rotate this part.
+    */
+  def image(move: Move): Part = {
+    if(rotatedBy(move.circle)) {
+      val rotatedBoundary = simplifiedBoundary.map{arc =>
+        val rotatedCircle = arc.circle.rotate(move.circle.x, move.circle.y, move.angle)
+        val rotatedStart = FixedPoint.mod2Pi(arc.start + move.angle)
+        val rotatedEnd = FixedPoint.mod2Pi(arc.end + move.angle)
+        Arc(rotatedCircle, rotatedStart, rotatedEnd)
+      }
+      new Part(rotatedBoundary)
+    }
+    else this
+  }
 
   /**
     * Tests if the other object is an equal `Part`.
