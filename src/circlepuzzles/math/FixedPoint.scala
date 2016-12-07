@@ -199,21 +199,6 @@ object FixedPoint {
   val Two = new FixedPoint(new BigDecimal("2"))
 
   /**
-    * Computes the angle whose cosine equals the argument.
-    *
-    * Warning: this implementation is currently bugged. Inputs that differ from +-1 by less than 1e-16 are known to
-    * cause `IllegalArgumentException`s to be thrown, due to a bug in `BigDecimalMath`. This may be addressed in the
-    * future by using our own implementation for those inputs. For example, one possible approximation is `sqrt(2 - 2x)`
-    * for `x` close to 1. For now, the only solution is to avoid using this method on inputs that could be arbitrarily
-    * close to 1.
-    * @param x Value whose arc cosine is to be returned. Requires `-1 <= x <= 1`.
-    * @return The arc cosine of the argument in the range [0,pi].
-    */
-  def acos(x: FixedPoint): FixedPoint = {
-    new FixedPoint(BigDecimalMath.acos(x.value))
-  }
-
-  /**
     * Computes the angle theta whose tangent equals the ratio `y / x` and is in the same quadrant as `(y, x)`.
     * @param y Y-coordinate.
     * @param x X-coordinate.
@@ -222,6 +207,7 @@ object FixedPoint {
     */
   def atan2(y: FixedPoint, x: FixedPoint): FixedPoint = {
     // See Wikipedia "Inverse trigonometric functions" on computing atan2 in terms of atan
+    // TODO consider returning an answer mod 2*pi, since this is how it gets used in practice
     val signX = x.compare(Zero)
     if(signX > 0) { // x positive
       new FixedPoint(BigDecimalMath.atan((y / x).value))
@@ -278,9 +264,10 @@ object FixedPoint {
   /**
     * Computes the sine of the argument.
     *
-    * Warning: this implementation is bugged for similar reasons to `acos`. This may throw an `IllegalArgumentException`
-    * on inputs very close to multiples of pi/2, but has special cases for `FixedPoint`s that compare as equal to a
-    * multiple of pi/2.
+    * Warning: this implementation is bugged. This may throw an `IllegalArgumentException` on inputs very close to
+    * multiples of pi/2 due to a bug in `BigDecimalMath`. This may be addressed in the future by using our own
+    * implementation for those inputs. As a precaution, this method has special cases for `FixedPoint`s that compare as
+    * equal to a multiple of pi/2. Nevertheless, this "fix" is not guaranteed to work.
     * @param theta Angle whose sine is to be computed, in radians.
     * @return Sine of the argument.
     */
@@ -295,9 +282,10 @@ object FixedPoint {
   /**
     * Computes the cosine of the argument.
     *
-    * Warning: this implementation is bugged for similar reasons to `acos`. This may throw an `IllegalArgumentException`
-    * on inputs very close to multiples of pi/2, but has special cases for `FixedPoint`s that compare as equal to a
-    * multiple of pi/2.
+    * Warning: this implementation is bugged. This may throw an `IllegalArgumentException` on inputs very close to
+    * multiples of pi/2 due to a bug in `BigDecimalMath`. This may be addressed in the future by using our own
+    * implementation for those inputs. As a precaution, this method has special cases for `FixedPoint`s that compare as
+    * equal to a multiple of pi/2. Nevertheless, this "fix" is not guaranteed to work.
     * @param theta Angle whose cosine is to be computed, in radians.
     * @return Cosine of the argument.
     */

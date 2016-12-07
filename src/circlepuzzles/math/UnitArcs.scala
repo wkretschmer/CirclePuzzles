@@ -234,14 +234,22 @@ object UnitArcs {
   val Empty = new UnitArcs(List((FixedPoint.Zero, false)))
 
   /**
-    * Creates an arc about the unit circle starting counterclockwise from the given start position with the given arc
-    * length.
-    * @param start Angle in radians at which this arc begins.
-    * @param length Arc length of this arc. Requires `0 < length < 2*pi`.
-    * @return An arc constructed counterclockwise from the specified start and length parameters.
+    * Creates an arc about the unit circle starting counterclockwise from the given start angle and ending at the given
+    * end angle.
+    * @param start Angle in radians at which this arc begins. Must be in the range [0,2*pi).
+    * @param end Angle in radians at which this arc begins. Must be in the range [0,2*pi) and not equal to `start`.
+    * @return An arc constructed counterclockwise from the specified start and end parameters.
     */
-  def apply(start: FixedPoint, length: FixedPoint): UnitArcs = {
-    val unrotated = new UnitArcs(List((FixedPoint.Zero, true), (length, false)))
-    unrotated.rotate(start)
+  def apply(start: FixedPoint, end: FixedPoint): UnitArcs = {
+    // Arc doesn't wrap around zero
+    if(end > start) {
+      if(start > FixedPoint.Zero) new UnitArcs(List((FixedPoint.Zero, false), (start, true), (end, false)))
+      else new UnitArcs(List((FixedPoint.Zero, true), (end, false)))
+    }
+    // Arc wraps around zero
+    else {
+      if(end > FixedPoint.Zero) new UnitArcs(List((FixedPoint.Zero, true), (end, false), (start, true)))
+      else new UnitArcs(List((FixedPoint.Zero, false), (start, true)))
+    }
   }
 }

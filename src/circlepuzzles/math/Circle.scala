@@ -37,14 +37,24 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
       }
     }
     else {
-      // The cosine of half of the angle that spans the intersection; follows from law of cosines
-      val cosHalfTheta = (distSquared + radius.pow(2) - that.radius.pow(2)) / (Two * radius * dist)
-      val halfTheta = acos(cosHalfTheta).abs
-      // Compute the angle to the center of the other circle
-      val angleToCenter = atan2(dy, dx)
-      // The arc runs between angleToCenter +- halfTheta
-      // UnitArcs takes care of computing this mod 2*pi
-      UnitArcs(angleToCenter - halfTheta, halfTheta * Two)
+      val radiusSquared = radius.pow(2)
+      // See http://paulbourke.net/geometry/circlesphere/
+      val a = (distSquared + radiusSquared - that.radius.pow(2)) / (Two * dist)
+      val h = sqrt(radiusSquared - a.pow(2))
+      // (midX, midY) is the intersection of the line between the centers and the line between the circle intersections
+      val midX = x + a * dx / dist
+      val midY = y + a * dy / dist
+
+      val newX1 = midX + h * dy / dist
+      val newY1 = midY - h * dx / dist
+      val angle1 = mod2Pi(atan2(newY1 - y, newX1 - x))
+
+      val newX2 = midX - h * dy / dist
+      val newY2 = midY + h * dx / dist
+      val angle2 = mod2Pi(atan2(newY2 - y, newX2 - x))
+      // It is not at all obvious that the arc necessarily starts at angle1 and ends at angle2. One can verify it by
+      // considering the possible signs of dx and dy.
+      UnitArcs(angle1, angle2)
     }
   }
 
