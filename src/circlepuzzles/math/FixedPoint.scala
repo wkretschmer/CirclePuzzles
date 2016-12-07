@@ -199,45 +199,46 @@ object FixedPoint {
   val Two = new FixedPoint(new BigDecimal("2"))
 
   /**
-    * Computes the angle theta whose tangent equals the ratio `y / x` and is in the same quadrant as `(y, x)`.
+    * Computes the angle theta whose tangent equals the ratio `y / x` and is in the same quadrant as `(y, x)`. Note that
+    * this method differs from the standard definition of `atan2` methods in that it computes the result to be in the
+    * range [0,2*pi).
     * @param y Y-coordinate.
     * @param x X-coordinate.
-    * @return The two argument arc tangent of `y` and `x`.
+    * @return The two argument arc tangent of `y` and `x` in the range [0,2*pi).
     * @throws ArithmeticException If `y` and `x` are both zero.
     */
   def atan2(y: FixedPoint, x: FixedPoint): FixedPoint = {
-    // See Wikipedia "Inverse trigonometric functions" on computing atan2 in terms of atan
-    // TODO consider returning an answer mod 2*pi, since this is how it gets used in practice
+    // signX and signY have the same signs as x and y, respectively
     val signX = x.compare(Zero)
-    if(signX > 0) { // x positive
-      new FixedPoint(BigDecimalMath.atan((y / x).value))
+    val signY = y.compare(Zero)
+    // x positive
+    if(signX > 0) {
+      // atan returns something in the range [0,pi/2)
+      if(signY >= 0) new FixedPoint(BigDecimalMath.atan((y / x).value))
+      // atan returns something in the range (-pi/2,0), so we add 2*pi to be in the range (3*pi/2,2*pi)
+      else new FixedPoint(BigDecimalMath.atan((y / x).value)) + TwoPi
     }
-    else if(signX < 0) { // x negative
-      if(y >= Zero) {
-        new FixedPoint(BigDecimalMath.atan((y / x).value)) + Pi
-      }
-      else {
-        new FixedPoint(BigDecimalMath.atan((y / x).value)) - Pi
-      }
+    // x negative
+    else if(signX < 0) {
+      // atan returns the arc tangent of the opposite angle, which is in the range (-pi/2,pi/2)
+      // Adding pi gives us the angle we want and puts it in the range (pi/2,3*pi/2)
+      new FixedPoint(BigDecimalMath.atan((y / x).value)) + Pi
     }
-    else { // x zero
-      val signY = y.compare(Zero)
-      if(signY > 0) {
-        HalfPi
-      }
-      else if(signY < 0) {
-        -HalfPi
-      }
-      else {
-        throw new ArithmeticException("atan2(0,0)")
-      }
+    // x zero
+    else {
+      // A vertical line pointing upward
+      if(signY > 0) HalfPi
+      // A vertical line pointing downward
+      else if(signY < 0) ThreeHalvesPi
+      // Undefined
+      else throw new ArithmeticException("atan2(0,0)")
     }
   }
 
   /**
-    * Normalizes the angle to be in the range [0,2pi).
+    * Normalizes the angle to be in the range [0,2*pi).
     * @param theta Angle to normalize, in radians.
-    * @return Equivalent angle in the range [0,2pi).
+    * @return Equivalent angle in the range [0,2*pi).
     */
   def mod2Pi(theta: FixedPoint): FixedPoint = {
     // We can't use BigDecimalMath here because a FixedPoint could compare as equal to TwoPi despite having an

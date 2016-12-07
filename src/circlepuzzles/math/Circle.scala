@@ -47,11 +47,11 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
 
       val newX1 = midX + h * dy / dist
       val newY1 = midY - h * dx / dist
-      val angle1 = mod2Pi(atan2(newY1 - y, newX1 - x))
+      val angle1 = atan2(newY1 - y, newX1 - x)
 
       val newX2 = midX - h * dy / dist
       val newY2 = midY + h * dx / dist
-      val angle2 = mod2Pi(atan2(newY2 - y, newX2 - x))
+      val angle2 = atan2(newY2 - y, newX2 - x)
       // It is not at all obvious that the arc necessarily starts at angle1 and ends at angle2. One can verify it by
       // considering the possible signs of dx and dy.
       UnitArcs(angle1, angle2)
@@ -82,7 +82,7 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
     }
     else if(distToSum == 0) { // Circles separate and intersect at one point
       // The point of intersection is at the angle between the centers
-      val thisAngle = mod2Pi(atan2(dy, dx))
+      val thisAngle = atan2(dy, dx)
       // The angle from the other center differs from thisAngle by pi; they are opposite angles
       val thatAngle = mod2Pi(thisAngle + Pi)
       Set((thisAngle, thatAngle))
@@ -90,7 +90,7 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
     else if(distToDiff == 0) { // Smaller circle contained in larger circle and circles intersect at one point
       // The angle is the same from both centers
       // This angle is also the angle from the center of the larger to the smaller circle
-      val angle = if(radius > that.radius) mod2Pi(atan2(dy, dx)) else mod2Pi(atan2(-dy, -dx))
+      val angle = if(radius > that.radius) atan2(dy, dx) else atan2(-dy, -dx)
       Set((angle, angle))
     }
     else{
@@ -104,13 +104,13 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
 
       val newX1 = midX + h * dy / dist
       val newY1 = midY - h * dx / dist
-      val thisAngle1 = mod2Pi(atan2(newY1 - y, newX1 - x))
-      val thatAngle1 = mod2Pi(atan2(newY1 - that.y, newX1 - that.x))
+      val thisAngle1 = atan2(newY1 - y, newX1 - x)
+      val thatAngle1 = atan2(newY1 - that.y, newX1 - that.x)
 
       val newX2 = midX - h * dy / dist
       val newY2 = midY + h * dx / dist
-      val thisAngle2 = mod2Pi(atan2(newY2 - y, newX2 - x))
-      val thatAngle2 = mod2Pi(atan2(newY2 - that.y, newX2 - that.x))
+      val thisAngle2 = atan2(newY2 - y, newX2 - x)
+      val thatAngle2 = atan2(newY2 - that.y, newX2 - that.x)
       Set((thisAngle1, thatAngle1), (thisAngle2, thatAngle2))
     }
   }
