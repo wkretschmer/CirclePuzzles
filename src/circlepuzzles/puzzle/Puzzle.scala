@@ -113,7 +113,7 @@ class Puzzle(val moves: Set[Move]) {
     *
     * Note: this assumes that the boundary of all parts are nonintersecting continuous loops in the plane. This
     * assumption may be violated for puzzles that have disconnected moves, i.e. moves between which parts cannot be
-    * exchanged.
+    * exchanged. All other fields that depend on this may require the same assumption.
     */
   lazy val parts: List[Part] = {
     // Map each arc intersection point to the set of arcs that start or end there. This is basically a graph where the
@@ -197,5 +197,47 @@ class Puzzle(val moves: Set[Move]) {
       next = arcsByIntersection.find(!_._2.isEmpty)
     }
     allParts
+  }
+
+  /**
+    * Maps each part to a unique integer ID in the range `[0, parts.size)`.
+    */
+  lazy val partIDs: Map[Part, Int] = parts.zipWithIndex.toMap
+
+  /**
+    * For each move, a list of `(move, map)` pairs where the map is from parts to parts, and represents the image under
+    * that move of each part.
+    */
+  lazy val partPermutations: List[(Move, Map[Part, Part])] = {
+    moves.toList.map{move =>
+      val permutation = parts.map{part =>
+        (part, part.image(move))
+      }.toMap
+      (move, permutation)
+    }
+  }
+
+  /**
+    * Like `partPermutations`, but the maps are instead in terms of the integer IDs in `partIDs`.
+    */
+  lazy val idPermutations: List[(Move, Map[Int, Int])] = {
+    for((move, permutation) <- partPermutations) yield {
+      val idPermutation = for((part, image) <- permutation) yield {
+        (partIDs(part), partIDs(image))
+      }
+      (move, idPermutation)
+    }
+  }
+
+  /**
+    * Like `partPermutations`, but the maps are turned into strings that GAP can interpret as a permutation using
+    * `AsPermutation(Transformation(_))`. This also means that each ID is incremented by 1 to be in the range
+    * `[1, parts.size]`.
+    */
+  lazy val permutationStrings: List[(Move, String)] = {
+    for((move, idPermutation) <- idPermutations) yield {
+      val list = List.tabulate(idPermutation.size)(i => idPermutation(i) + 1)
+      (move, "[" + list.mkString(",") + "]")
+    }
   }
 }
