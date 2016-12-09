@@ -7,6 +7,10 @@ import javax.swing.{JFrame, JPanel}
 import circlepuzzles.math._
 import circlepuzzles.puzzle._
 
+/**
+  * Example showing how to define a puzzle and get its permutation representation. This also visualizes the puzzle's cut
+  * set.
+  */
 object Example {
   def main(args: Array[String]): Unit = {
     // We'll make a puzzle with two moves, centered at (+-1,0)
