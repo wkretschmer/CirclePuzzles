@@ -58,8 +58,6 @@ class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
     */
   def unary_- : FixedPoint = new FixedPoint(value.negate())
 
-  // TODO: might want implementations of %, /%, max, min
-
   /**
     * Computes a rounded version of this `FixedPoint` that should be used for comparison with other `FixedPoint`
     * instances. This works by adding a fixed random offset, then rounding to `FixedPoint.compareScale` places after the
