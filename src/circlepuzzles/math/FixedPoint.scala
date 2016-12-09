@@ -103,12 +103,25 @@ class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
     * @return A string representation of this `FixedPoint`.
     */
   override def toString: String = value.toString
+
+  /**
+    * Returns the `Double` closest in value of this `FixedPoint`.
+    * @return A `Double` approximately equal to this.
+    */
+  def toDouble: Double = value.doubleValue()
 }
 
 /**
   * Utilities and constants associated with `FixedPoint` arithmetic.
   */
 object FixedPoint {
+  /**
+    * Converts a string to its corresponding `FixedPoint` value.
+    * @param value A decimal string.
+    * @return `FixedPoint` with value represented by the string.
+    */
+  def apply(value: String): FixedPoint = new FixedPoint(new BigDecimal(value))
+
   /**
     * Number of decimal places after the decimal point stored for `FixedPoint` instances.
     */
