@@ -10,9 +10,14 @@ import scala.collection.mutable
 /**
   * Circle puzzles in the plane. A puzzle is defined by its atomic moves. Each move rotates the interior of its circle
   * by a fixed fraction of 2*pi; this action determines the possible states of the puzzle.
-  * @param moves Set of allowed moves that generate this puzzle.
+  * @param moves Allowed moves that generate this puzzle.
   */
-class Puzzle(val moves: Set[Move]) {
+class Puzzle(moves: Move*) {
+  /**
+    * A list of the moves that generate this puzzle.
+    */
+  val movesList = moves.distinct.toList
+
   /**
     * A set of cuts. An entry `(circle, arcs)` such a map indicates that the arcs in `arcs` around the circle `circle`
     * belong in the cut set.
@@ -45,7 +50,6 @@ class Puzzle(val moves: Set[Move]) {
     * This may not terminate for infinite puzzles (i.e. puzzles that jumble).
     */
   lazy val cutSet: CutSet = {
-    val movesList = moves.toList
     // Start with one complete cut for each move's circle
     val allCuts = mutable.Map(movesList.map(move => (move.circle, UnitArcs.FullCircle)):_*)
     // For each move, maintain a set of cuts whose images have not been computed under that move
@@ -209,7 +213,7 @@ class Puzzle(val moves: Set[Move]) {
     * that move of each part.
     */
   lazy val partPermutations: List[(Move, Map[Part, Part])] = {
-    moves.toList.map{move =>
+    movesList.map{move =>
       val permutation = parts.map{part =>
         (part, part.image(move))
       }.toMap
