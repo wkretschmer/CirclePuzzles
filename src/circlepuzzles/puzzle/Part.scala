@@ -78,8 +78,10 @@ class Part(boundary: List[Arc]) {
     // have one endpoint strictly contained in the circle.
     if(boundarySet.size >= 3) {
       boundarySet.exists{arc =>
-        val (x, y) = arc.startPoint
-        circle.strictlyContains(x, y)
+        // Have to check both endpoints because two arcs could start at the same point
+        val (startX, startY) = arc.startPoint
+        val (endX, endY) = arc.endPoint
+        circle.strictlyContains(startX, startY) || circle.strictlyContains(endX, endY)
       }
     }
     // Otherwise, it is possible that the boundary set contains just two arcs, in which case both endpoints could be on
@@ -93,14 +95,16 @@ class Part(boundary: List[Arc]) {
           else FixedPoint.mod2Pi(middleAngle + FixedPoint.Pi)
         val x = arc.circle.x + arc.circle.radius * FixedPoint.cos(actualMidAngle)
         val y = arc.circle.y + arc.circle.radius * FixedPoint.sin(actualMidAngle)
-        val result = circle.strictlyContains(x, y)
-        result
+        circle.strictlyContains(x, y)
       }
     }
-    // Otherwise, the boundary set contains just one arc. We just test that the other circle contains the boundary arc,
-    // because we assume that the set is nonempty, and that arc was cut by the circle.
+    // Otherwise, the boundary set contains just one arc. We just test that the other circle contains the boundary arc.
     else {
       val arc = boundarySet.head
+      // If the arc isn't a full circle, something has gone horribly wrong
+      if(arc.start != arc.end) throw new IllegalArgumentException("Part boundary not closed: " + arc)
+      // The arc must have smaller radius to be contained in the circle. Then, because we assume the arc was cut by the
+      // circle, it suffices to just check that the circle contains its center.
       arc.circle.radius < circle.radius && circle.strictlyContains(arc.circle.x, arc.circle.y)
     }
   }
@@ -139,9 +143,8 @@ class Part(boundary: List[Arc]) {
   }
 
   /**
-    * Returns a hash code that satisfies the [[Object]] contract, which is to say that the hash depends only on
-    * `boundarySet`.
-    * @return A hash code depending only on `boundarySet`.
+    * A hash code that satisfies the [[Object]] contract, which is to say that the hash depends only on `boundarySet`.
+    * Memoized.
     */
-  override def hashCode = boundarySet.hashCode()
+  override val hashCode = boundarySet.hashCode()
 }
