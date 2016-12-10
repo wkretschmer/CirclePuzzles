@@ -116,6 +116,13 @@ class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
   */
 object FixedPoint {
   /**
+    * Converts an integer to its corresponding `FixedPoint` value.
+    * @param value An integer.
+    * @return `FixedPoint` with value represented by the integer.
+    */
+  def apply(value: Int): FixedPoint = new FixedPoint(new BigDecimal(value))
+
+  /**
     * Converts a string to its corresponding `FixedPoint` value.
     * @param value A decimal string.
     * @return `FixedPoint` with value represented by the string.
