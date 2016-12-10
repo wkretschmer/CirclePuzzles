@@ -213,7 +213,7 @@ class Puzzle(moves: Move*) {
 
   /**
     * For each move, a list of `(move, map)` pairs where the map is from parts to parts, and represents the image under
-    * that move of each part.
+    * that move of each part. Note that this ignores part orientation.
     */
   lazy val partPermutations: List[(Move, Map[Part, Part])] = {
     movesList.map{move =>

@@ -6,7 +6,8 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 
 /**
-  * Parts on circle puzzles with boundaries that form nonintersecting continuous loops in the plane.
+  * Parts on circle puzzles with boundaries that form nonintersecting continuous loops in the plane. Parts do not have
+  * orientation, so two parts with the same boundary are considered equal.
   * @param boundary Nonempty list of all arcs in the boundary of this part. This list must be ordered, in the sense that
   * adjacent arcs in the list must share an endpoint. The list must also loop around (i.e the last arc must share an
   * endpoint with the first arc). However, this list does not need to be simplified. For example, there can be adjacent
