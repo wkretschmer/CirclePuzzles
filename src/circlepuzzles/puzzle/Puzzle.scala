@@ -10,6 +10,9 @@ import scala.collection.mutable
 /**
   * Circle puzzles in the plane. A puzzle is defined by its atomic moves. Each move rotates the interior of its circle
   * by a fixed fraction of 2*pi; this action determines the possible states of the puzzle.
+  *
+  * Most fields in this class are lazy vals because they are expensive to compute and should be memoized. They are lazy
+  * so one doesn't have to pay the cost of computing those fields in the constructor.
   * @param moves Allowed moves that generate this puzzle.
   */
 class Puzzle(moves: Move*) {
