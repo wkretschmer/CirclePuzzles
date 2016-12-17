@@ -12,20 +12,20 @@ package circlepuzzles.math
   */
 case class Arc(circle: Circle, start: FixedPoint, end: FixedPoint) {
   /**
-    * The (x, y) coordinates of this circle's start point.
+    * This circle's start point.
     */
   val startPoint = {
-    val x = circle.x + circle.radius * FixedPoint.cos(start)
-    val y = circle.y + circle.radius * FixedPoint.sin(start)
-    (x, y)
+    val x = circle.center.x + circle.radius * FixedPoint.cos(start)
+    val y = circle.center.y + circle.radius * FixedPoint.sin(start)
+    FixedPoint2D(x, y)
   }
 
   /**
-    * The (x, y) coordinates of this circle's end point.
+    * This circle's end point.
     */
   val endPoint = {
-    val x = circle.x + circle.radius * FixedPoint.cos(end)
-    val y = circle.y + circle.radius * FixedPoint.sin(end)
-    (x, y)
+    val x = circle.center.x + circle.radius * FixedPoint.cos(end)
+    val y = circle.center.y + circle.radius * FixedPoint.sin(end)
+    FixedPoint2D(x, y)
   }
 }

@@ -17,8 +17,8 @@ object Example {
     // Both moves have radius 2.5 and turning angle 2*pi/3
     val r = FixedPoint("2.5")
     val n = 3
-    val move0 = Move(Circle(-FixedPoint.One, FixedPoint.Zero, r), n)
-    val move1 = Move(Circle(FixedPoint.One, FixedPoint.Zero, r), n)
+    val move0 = Move(Circle(FixedPoint2D(-FixedPoint.One, FixedPoint.Zero), r), n)
+    val move1 = Move(Circle(FixedPoint2D(FixedPoint.One, FixedPoint.Zero), r), n)
     // Make a puzzle with the two moves
     val puzzle = new Puzzle(move0, move1)
     // Print out a permutation representation that GAP can read
@@ -38,7 +38,7 @@ object Example {
     frame.setVisible(true)
     val graphics = panel.getGraphics.create().asInstanceOf[Graphics2D]
     // Iterate through the arcs that make cuts
-    for(Arc(Circle(x, y, r), start, end) <- puzzle.cutsAsArcs) {
+    for(Arc(Circle(FixedPoint2D(x, y), r), start, end) <- puzzle.cutsAsArcs) {
       // Scale everything to fit in the frame
       val diameter = r.toDouble * 200.0
       // Arc2D takes the coordinates of the corner of a rectangle that bounds the arc's circle

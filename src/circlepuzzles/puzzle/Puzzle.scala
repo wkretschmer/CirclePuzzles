@@ -70,7 +70,7 @@ class Puzzle(moves: Move*) {
             // Compute the image of the cuts under each repetition of this move
             for(angle <- move.nonzeroAngles) {
               // Rotate the cuts by rotating the center and arcs by the angle
-              val rotatedCircle = circle.rotate(move.circle.x, move.circle.y, angle)
+              val rotatedCircle = circle.rotate(move.circle.center, angle)
               val rotatedArcs = intersection.rotate(angle)
               // Add the rotated arcs, and get any concentric, coradial arcs that were already computed
               val existingArcs = add(rotatedCircle, rotatedArcs, allCuts)
@@ -128,7 +128,7 @@ class Puzzle(moves: Move*) {
     // if the arc starts at that vertex. Thus, a single TreeSet in the map is basically an adjacency list for the
     // corresponding point of intersection. The arcs around a single vertex are sorted in such a way that any two
     // adjacent sorted arcs belong to the same part. The ordering implicitly wraps around.
-    val arcsByIntersection = mutable.Map[(FixedPoint, FixedPoint), util.TreeSet[(Arc, Boolean)]]()
+    val arcsByIntersection = mutable.Map[FixedPoint2D, util.TreeSet[(Arc, Boolean)]]()
     // Comparator for sorting arcs around a single intersection point
     val comparator = new Comparator[(Arc, Boolean)] {
       override def compare(a1: (Arc, Boolean), a2: (Arc, Boolean)): Int = {

@@ -80,9 +80,7 @@ class Part(boundary: List[Arc]) {
     if(boundarySet.size >= 3) {
       boundarySet.exists{arc =>
         // Have to check both endpoints because two arcs could start at the same point
-        val (startX, startY) = arc.startPoint
-        val (endX, endY) = arc.endPoint
-        circle.strictlyContains(startX, startY) || circle.strictlyContains(endX, endY)
+        circle.strictlyContains(arc.startPoint) || circle.strictlyContains(arc.endPoint)
       }
     }
     // Otherwise, it is possible that the boundary set contains just two arcs, in which case both endpoints could be on
@@ -94,9 +92,9 @@ class Part(boundary: List[Arc]) {
         val actualMidAngle =
           if(arc.end > arc.start) middleAngle
           else FixedPoint.mod2Pi(middleAngle + FixedPoint.Pi)
-        val x = arc.circle.x + arc.circle.radius * FixedPoint.cos(actualMidAngle)
-        val y = arc.circle.y + arc.circle.radius * FixedPoint.sin(actualMidAngle)
-        circle.strictlyContains(x, y)
+        val x = arc.circle.center.x + arc.circle.radius * FixedPoint.cos(actualMidAngle)
+        val y = arc.circle.center.y + arc.circle.radius * FixedPoint.sin(actualMidAngle)
+        circle.strictlyContains(FixedPoint2D(x, y))
       }
     }
     // Otherwise, the boundary set contains just one arc. We just test that the other circle contains the boundary arc.
@@ -106,7 +104,7 @@ class Part(boundary: List[Arc]) {
       if(arc.start != arc.end) throw new IllegalArgumentException("Part boundary not closed: " + arc)
       // The arc must have smaller radius to be contained in the circle. Then, because we assume the arc was cut by the
       // circle, it suffices to just check that the circle contains its center.
-      arc.circle.radius < circle.radius && circle.strictlyContains(arc.circle.x, arc.circle.y)
+      arc.circle.radius < circle.radius && circle.strictlyContains(arc.circle.center)
     }
   }
 
@@ -119,7 +117,7 @@ class Part(boundary: List[Arc]) {
   def image(move: Move): Part = {
     if(rotatedBy(move.circle)) {
       val rotatedBoundary = simplifiedBoundary.map{arc =>
-        val rotatedCircle = arc.circle.rotate(move.circle.x, move.circle.y, move.angle)
+        val rotatedCircle = arc.circle.rotate(move.circle.center, move.angle)
         val rotatedStart = FixedPoint.mod2Pi(arc.start + move.angle)
         val rotatedEnd = FixedPoint.mod2Pi(arc.end + move.angle)
         Arc(rotatedCircle, rotatedStart, rotatedEnd)

@@ -4,11 +4,10 @@ import FixedPoint._
 
 /**
   * Immutable circles on the Euclidean plane.
-  * @param x X-coordinate of this circle's center.
-  * @param y Y-coordinate of this circle's center.
+  * @param center Center of this circle.
   * @param radius Positive radius of this circle.
   */
-case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
+case class Circle(center: FixedPoint2D, radius: FixedPoint) {
   /**
     * Compute the set of points on the boundary of this circle that intersect the interior of the other circle.
     * If the circles do not intersect or are tangent at a single point, returns an empty arc.
@@ -20,8 +19,8 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
     */
   def intersectionArc(that: Circle): UnitArcs = {
     // Distances between x and y coordinates
-    val dx = that.x - x
-    val dy = that.y - y
+    val dx = that.center.x - center.x
+    val dy = that.center.y - center.y
     // Distance between centers
     val distSquared = dx.pow(2) + dy.pow(2)
     val dist = sqrt(distSquared)
@@ -42,16 +41,16 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
       val a = (distSquared + radiusSquared - that.radius.pow(2)) / (Two * dist)
       val h = sqrt(radiusSquared - a.pow(2))
       // (midX, midY) is the intersection of the line between the centers and the line between the circle intersections
-      val midX = x + a * dx / dist
-      val midY = y + a * dy / dist
+      val midX = center.x + a * dx / dist
+      val midY = center.y + a * dy / dist
 
       val newX1 = midX + h * dy / dist
       val newY1 = midY - h * dx / dist
-      val angle1 = atan2(newY1 - y, newX1 - x)
+      val angle1 = atan2(newY1 - center.y, newX1 - center.x)
 
       val newX2 = midX - h * dy / dist
       val newY2 = midY + h * dx / dist
-      val angle2 = atan2(newY2 - y, newX2 - x)
+      val angle2 = atan2(newY2 - center.y, newX2 - center.x)
       // It is not at all obvious that the arc necessarily starts at angle1 and ends at angle2. One can verify it by
       // considering the possible signs of dx and dy.
       UnitArcs(angle1, angle2)
@@ -69,8 +68,8 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
   def intersections(that: Circle): Set[(FixedPoint, FixedPoint)] = {
     // TODO: it would be nice to remove some of the duplicate code between this and intersectionArc
     // Distances between x and y coordinates
-    val dx = that.x - x
-    val dy = that.y - y
+    val dx = that.center.x - center.x
+    val dy = that.center.y - center.y
     // Distance between centers
     val distSquared = dx.pow(2) + dy.pow(2)
     val dist = sqrt(distSquared)
@@ -99,48 +98,40 @@ case class Circle(x: FixedPoint, y: FixedPoint, radius: FixedPoint) {
       val a = (distSquared + radiusSquared - that.radius.pow(2)) / (Two * dist)
       val h = sqrt(radiusSquared - a.pow(2))
       // (midX, midY) is the intersection of the line between the centers and the line between the circle intersections
-      val midX = x + a * dx / dist
-      val midY = y + a * dy / dist
+      val midX = center.x + a * dx / dist
+      val midY = center.y + a * dy / dist
 
       val newX1 = midX + h * dy / dist
       val newY1 = midY - h * dx / dist
-      val thisAngle1 = atan2(newY1 - y, newX1 - x)
-      val thatAngle1 = atan2(newY1 - that.y, newX1 - that.x)
+      val thisAngle1 = atan2(newY1 - center.y, newX1 - center.x)
+      val thatAngle1 = atan2(newY1 - that.center.y, newX1 - that.center.x)
 
       val newX2 = midX - h * dy / dist
       val newY2 = midY + h * dx / dist
-      val thisAngle2 = atan2(newY2 - y, newX2 - x)
-      val thatAngle2 = atan2(newY2 - that.y, newX2 - that.x)
+      val thisAngle2 = atan2(newY2 - center.y, newX2 - center.x)
+      val thatAngle2 = atan2(newY2 - that.center.y, newX2 - that.center.x)
       Set((thisAngle1, thatAngle1), (thisAngle2, thatAngle2))
     }
   }
 
   /**
     * Compute the rotation of this circle about an arbitrary point in the plane.
-    * @param rx X-coordinate of rotation center.
-    * @param ry Y-coordinate of rotation center.
-    * @param angle Rotation angle, in radians.
+    * @param rotationCenter Center of rotation.
+    * @param angle Angle of rotation, in radians.
     * @return The rotation of this circle about the specified point by the specified angle.
     */
-  def rotate(rx: FixedPoint, ry: FixedPoint, angle: FixedPoint): Circle = {
-    val dx = x - rx
-    val dy = y - ry
-    val cosAngle = cos(angle)
-    val sinAngle = sin(angle)
-    val newdx = cosAngle * dx - sinAngle * dy
-    val newdy = sinAngle * dx + cosAngle * dy
-    Circle(rx + newdx, ry + newdy, radius)
+  def rotate(rotationCenter: FixedPoint2D, angle: FixedPoint): Circle = {
+    Circle(center.rotate(rotationCenter, angle), radius)
   }
 
   /**
-    * Tests if this circle strictly contains `(xx, yy)`.
-    * @param xx X-coordinate of point.
-    * @param yy Y-coordinate of point.
-    * @return True if and only if the point specified by the arguments is in the interior of this circle.
+    * Tests if this circle strictly contains the given point.
+    * @param pt A point in the plane.
+    * @return True if and only if the point given is in the interior of this circle.
     */
-  def strictlyContains(xx: FixedPoint, yy: FixedPoint): Boolean = {
-    val dx = x - xx
-    val dy = y - yy
+  def strictlyContains(pt: FixedPoint2D): Boolean = {
+    val dx = center.x - pt.x
+    val dy = center.y - pt.y
     dx.pow(2) + dy.pow(2) < radius.pow(2)
   }
 }
