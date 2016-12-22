@@ -68,9 +68,9 @@ class Puzzle(moves: Move*) {
           val intersection = circle.intersectionArc(move.circle).intersection(arcs)
           if(intersection.nonEmpty) {
             // Compute the image of the cuts under each repetition of this move
-            for(angle <- move.nonzeroAngles) {
+            for((angle, sin, cos) <- move.nonzeroAngles) {
               // Rotate the cuts by rotating the center and arcs by the angle
-              val rotatedCircle = circle.rotate(move.circle.center, angle)
+              val rotatedCircle = circle.rotate(move.circle.center, sin, cos)
               val rotatedArcs = intersection.rotate(angle)
               // Add the rotated arcs, and get any concentric, coradial arcs that were already computed
               val existingArcs = add(rotatedCircle, rotatedArcs, allCuts)

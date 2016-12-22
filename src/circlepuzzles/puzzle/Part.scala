@@ -117,7 +117,7 @@ class Part(boundary: List[Arc]) {
   def image(move: Move): Part = {
     if(rotatedBy(move.circle)) {
       val rotatedBoundary = simplifiedBoundary.map{arc =>
-        val rotatedCircle = arc.circle.rotate(move.circle.center, move.angle)
+        val rotatedCircle = arc.circle.rotate(move.circle.center, move.sinAngle, move.cosAngle)
         val rotatedStart = FixedPoint.mod2Pi(arc.start + move.angle)
         val rotatedEnd = FixedPoint.mod2Pi(arc.end + move.angle)
         Arc(rotatedCircle, rotatedStart, rotatedEnd)

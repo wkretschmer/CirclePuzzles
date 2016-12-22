@@ -125,6 +125,17 @@ case class Circle(center: FixedPoint2D, radius: FixedPoint) {
   }
 
   /**
+    * Compute the rotation of this circle about an arbitrary point in the plane.
+    * @param rotationCenter Center of rotation.
+    * @param sin Sine of the angle of rotation.
+    * @param cos Cosine of the angle rotation.
+    * @return The rotation of this circle about the specified point by the specified angle.
+    */
+  def rotate(rotationCenter: FixedPoint2D, sin: FixedPoint, cos: FixedPoint): Circle = {
+    Circle(center.rotate(rotationCenter, sin, cos), radius)
+  }
+
+  /**
     * Tests if this circle strictly contains the given point.
     * @param pt A point in the plane.
     * @return True if and only if the point given is in the interior of this circle.
