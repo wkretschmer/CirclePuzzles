@@ -25,7 +25,7 @@ class Part(boundary: List[Arc]) {
     arcs match {
       // See if we can combine these two arcs
       case first :: second :: rest =>
-        // They can be combined if they belong to the same circle and share and endpoint
+        // They can be combined if they belong to the same circle and share an endpoint
         if(first.circle == second.circle) {
           // Combine the first two arcs, but don't add to the buffer yet because they might be combinable with more arcs
           if(first.end == second.start) simplify(Arc(first.circle, first.start, second.end) :: rest, current)
