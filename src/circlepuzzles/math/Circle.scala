@@ -145,4 +145,15 @@ case class Circle(center: FixedPoint2D, radius: FixedPoint) {
     val dy = center.y - pt.y
     dx.pow(2) + dy.pow(2) < radius.pow(2)
   }
+
+  /**
+    * Tests if this circle contains the given point.
+    * @param pt A point in the plane.
+    * @return True if and only if the point given is in the interior or on the boundary of this circle.
+    */
+  def contains(pt: FixedPoint2D): Boolean = {
+    val dx = center.x - pt.x
+    val dy = center.y - pt.y
+    dx.pow(2) + dy.pow(2) <= radius.pow(2)
+  }
 }
