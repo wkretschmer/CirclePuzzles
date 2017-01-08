@@ -61,7 +61,7 @@ class Puzzle(moves: Move*) {
     // Repeat while there are cuts whose images have not been computed
     while(toProcess.values.exists(_.nonEmpty)) {
       // Iterate over one move (and its set myCuts of cuts to process) at a time
-      for((move, myCuts) <- toProcess ; (circle, arcs) <- myCuts) {
+      for((move, myCuts) <- toProcess) {
         // Process one set of concentric, coradial cuts at a time
         for((circle, arcs) <- myCuts) {
           // First verify that the cuts actually intersect nontrivially
