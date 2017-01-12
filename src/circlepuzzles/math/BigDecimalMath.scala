@@ -12,7 +12,7 @@ import scala.annotation.tailrec
   * are computed on a best effort basis; a rounding error may lead to returning a value on the wrong side of a
   * discontinuity or just beyond a bound.
   */
-object MyBigDecimalMath {
+object BigDecimalMath {
   /**
     * `BigDecimal` with value 2.
     */

@@ -1,8 +1,6 @@
 package circlepuzzles.math
 
-import java.math.{BigDecimal, MathContext}
-
-import org.nevec.rjm.BigDecimalMath
+import java.math.BigDecimal
 
 import scala.util.Random
 
@@ -142,7 +140,7 @@ object FixedPoint {
   /**
     * Rounding mode used for intermediate computation and comparisons.
     */
-  val RoundingMode = java.math.RoundingMode.HALF_EVEN
+  val RoundingMode = BigDecimalMath.RoundingMode
 
   /**
     * Randomly generated offset that is added to `FixedPoint` instances before rounding for comparison. The use of
@@ -165,41 +163,22 @@ object FixedPoint {
   /**
     * `FixedPoint` with value closest to pi/2.
     */
-  val HalfPi = {
-    // Need ComputeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
-    // end to get the rounding right.
-    val piValue = BigDecimalMath.pi(new MathContext(ComputeScale + 2, RoundingMode))
-    new FixedPoint(piValue.divide(new BigDecimal("2"), ComputeScale, RoundingMode))
-  }
+  val HalfPi = new FixedPoint(BigDecimalMath.halfPi(ComputeScale))
 
   /**
     * `FixedPoint` with value closest to pi.
     */
-  val Pi = {
-    // Need ComputeScale + 1 digits because there is 1 digit before the decimal point.
-    val piValue = BigDecimalMath.pi(new MathContext(ComputeScale + 1, RoundingMode))
-    new FixedPoint(piValue)
-  }
+  val Pi = new FixedPoint(BigDecimalMath.pi(ComputeScale))
 
   /**
     * `FixedPoint` with value closest to 3*pi/2.
     */
-  val ThreeHalvesPi = {
-    // Need ComputeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
-    // end to get the rounding right.
-    val piValue = BigDecimalMath.pi(new MathContext(ComputeScale + 2, RoundingMode))
-    new FixedPoint(piValue.multiply(new BigDecimal("1.5")))
-  }
+  val ThreeHalvesPi = new FixedPoint(BigDecimalMath.threeHalvesPi(ComputeScale))
 
   /**
     * `FixedPoint` with value closest to 2*pi.
     */
-  val TwoPi = {
-    // Need ComputeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
-    // end to get the rounding right.
-    val piValue = BigDecimalMath.pi(new MathContext(ComputeScale + 2, RoundingMode))
-    new FixedPoint(piValue.multiply(new BigDecimal("2")))
-  }
+  val TwoPi = new FixedPoint(BigDecimalMath.twoPi(ComputeScale))
 
   /**
     * `FixedPoint` with value 0.
@@ -214,7 +193,7 @@ object FixedPoint {
   /**
     * `FixedPoint` with value 2.
     */
-  val Two = new FixedPoint(new BigDecimal("2"))
+  val Two = new FixedPoint(BigDecimalMath.Two)
 
   /**
     * Computes the angle theta whose tangent equals the ratio `y / x` and is in the same quadrant as `(y, x)`. Note that
@@ -226,31 +205,7 @@ object FixedPoint {
     * @throws ArithmeticException If `y` and `x` are both zero.
     */
   def atan2(y: FixedPoint, x: FixedPoint): FixedPoint = {
-    // signX and signY have the same signs as x and y, respectively
-    val signX = x.compare(Zero)
-    val signY = y.compare(Zero)
-    // x positive
-    if(signX > 0) {
-      // atan returns something in the range [0,pi/2)
-      if(signY >= 0) new FixedPoint(BigDecimalMath.atan((y / x).value))
-      // atan returns something in the range (-pi/2,0), so we add 2*pi to be in the range (3*pi/2,2*pi)
-      else new FixedPoint(BigDecimalMath.atan((y / x).value)) + TwoPi
-    }
-    // x negative
-    else if(signX < 0) {
-      // atan returns the arc tangent of the opposite angle, which is in the range (-pi/2,pi/2)
-      // Adding pi gives us the angle we want and puts it in the range (pi/2,3*pi/2)
-      new FixedPoint(BigDecimalMath.atan((y / x).value)) + Pi
-    }
-    // x zero
-    else {
-      // A vertical line pointing upward
-      if(signY > 0) HalfPi
-      // A vertical line pointing downward
-      else if(signY < 0) ThreeHalvesPi
-      // Undefined
-      else throw new ArithmeticException("atan2(0,0)")
-    }
+    mod2Pi(new FixedPoint(BigDecimalMath.atan2(y.value, x.value, ComputeScale)))
   }
 
   /**
@@ -268,47 +223,29 @@ object FixedPoint {
   }
 
   /**
-    * Computes the square root of the argument.
-    * @param x Nonnegative argument whose square root is to be computed.
-    * @return Nonnegative square root of the argument.
-    * @throws ArithmeticException If `x` is negative.
+    * Computes the square root of the argument. Returns `Zero` if x is negative.
+    * @param x Argument whose square root is to be computed.
+    * @return Nonnegative square root of the argument, or `Zero` if it is negative.
     */
   def sqrt(x: FixedPoint): FixedPoint = {
-    val sign = x.compare(Zero)
-    if(sign < 0) throw new ArithmeticException("square root of negative number")
-    else if(sign == 0) Zero
-    else new FixedPoint(BigDecimalMath.sqrt(x.value))
+    new FixedPoint(BigDecimalMath.sqrt(x.value, ComputeScale))
   }
 
   /**
     * Computes the sine of the argument.
-    *
-    * Warning: this implementation is bugged. This may throw an `IllegalArgumentException` on inputs very close to
-    * multiples of pi/2 due to a bug in `BigDecimalMath`. This may be addressed in the future by using our own
-    * implementation for those inputs. As a precaution, this method has special cases for `FixedPoint`s that compare as
-    * equal to a multiple of pi/2. Nevertheless, this "fix" is not guaranteed to work.
     * @param theta Angle whose sine is to be computed, in radians.
     * @return Sine of the argument.
     */
   def sin(theta: FixedPoint): FixedPoint = {
-    val normalized = mod2Pi(theta)
-    if(normalized == Zero || normalized == Pi) Zero
-    else if(normalized == HalfPi) One
-    else if(normalized == ThreeHalvesPi) -One
-    else new FixedPoint(BigDecimalMath.sin(theta.value))
+    new FixedPoint(BigDecimalMath.sin(theta.value, ComputeScale))
   }
 
   /**
     * Computes the cosine of the argument.
-    *
-    * Warning: this implementation is bugged. This may throw an `IllegalArgumentException` on inputs very close to
-    * multiples of pi/2 due to a bug in `BigDecimalMath`. This may be addressed in the future by using our own
-    * implementation for those inputs. As a precaution, this method has special cases for `FixedPoint`s that compare as
-    * equal to a multiple of pi/2. Nevertheless, this "fix" is not guaranteed to work.
     * @param theta Angle whose cosine is to be computed, in radians.
     * @return Cosine of the argument.
     */
   def cos(theta: FixedPoint): FixedPoint = {
-    sin(theta + HalfPi)
+    new FixedPoint(BigDecimalMath.cos(theta.value, ComputeScale))
   }
 }
