@@ -39,14 +39,17 @@ trait Geometry {
   /**
     * Base trait for points. Immutable.
     */
-  trait BasePoint { this: Point => // Every BasePoint must also be a Point
+  trait BasePoint extends Rotatable[Point] {
+    this: Point => // Every BasePoint must also be a Point
 
   }
 
   /**
     * Base trait for circles. Immutable.
     */
-  trait BaseCircle { this: Circle => // Every BaseCircle must also be a Circle
+  trait BaseCircle extends HasCenter with Rotatable[Circle] {
+    this: Circle => // Every BaseCircle must also be a Circle
+
     /**
       * Produces an empty set of arcs around this circle.
       * @return Empty set of arcs around this circle.
@@ -63,18 +66,8 @@ trait Geometry {
   /**
     * Base trait for disks. Immutable.
     */
-  trait BaseDisk { this: Disk => // Every BaseDisk must also be a Disk
-    /**
-      * The boundary of this disk, which is a circle.
-      * @return Circle corresponding to this disk's boundary.
-      */
-    def circle: Circle
-
-    /**
-      * The point which is equidistant from every point on the boundary.
-      * @return The center of this disk.
-      */
-    def center: Point
+  trait BaseDisk extends HasCircle with Rotatable[Disk] {
+    this: Disk => // Every BaseDisk must also be a Disk
 
     /**
       * Test if the given point is in the interior or on the boundary of this disk.
@@ -94,7 +87,9 @@ trait Geometry {
   /**
     * Base trait for arcs. Immutable.
     */
-  trait BaseArc { this: Arc => // Every BaseArc must also be an Arc
+  trait BaseArc extends HasCircle with Rotatable[Arc] {
+    this: Arc => // Every BaseArc must also be an Arc
+
     /**
       * Attempts to combine two arcs around the same circle. If `this` and `that` belong to the same circle and share at
       * least one point (possibly an endpoint), this returns `Some(union)`, where `union` is the arc formed by the union
@@ -121,25 +116,13 @@ trait Geometry {
       * @return Midpoint of this arc.
       */
     def midPoint: Point
-
-    /**
-      * Rotate this arc about the given point by the given angle, in the counterclockwise direction.
-      * @param center Center of rotation.
-      * @param angle Angle of rotation.
-      * @return Rotation of this arc about the given point by the given angle.
-      */
-    def rotate(center: Point, angle: Angle): Arc
   }
 
   /**
     * Base trait for arcs on a circle. Immutable.
     */
-  trait BaseArcsOnCircle { this: ArcsOnCircle => // Every BaseArcsOnCircle must also be an ArcsOnCircle
-    /**
-      * The circle to which arcs in this collection belong.
-      * @return Circle corresponding to these arcs.
-      */
-    def circle: Circle
+  trait BaseArcsOnCircle extends HasCircle with Rotatable[ArcsOnCircle] {
+    this: ArcsOnCircle => // Every BaseArcsOnCircle must also be an ArcsOnCircle
 
     /**
       * Compute the union of this with the given arcs by joining overlapping segments.
@@ -169,13 +152,57 @@ trait Geometry {
       * @return True if and only if this arc collection is nonempty.
       */
     def nonEmpty: Boolean
+  }
+
+  // Shared traits for type members
+
+  /**
+    * Objects that can be rotated.
+    * @tparam T Type of images under rotations. This is usually the same type as whatever class implements this trait.
+    */
+  trait Rotatable[T <: Rotatable[T]] {
+    /**
+      * Rotate about the center of the given object in the counterclockwise direction.
+      * @param hasCenter Object whose center is the center of rotation.
+      * @param angle Angle of rotation.
+      * @return Image of this under the specified rotation.
+      */
+    def rotate(hasCenter: HasCenter, angle: Angle): T = rotate(hasCenter.center, angle)
 
     /**
-      * Rotate these arcs about the given point by the given angle, in the counterclockwise direction.
+      * Rotate about the given point in the counterclockwise direction.
       * @param center Center of rotation.
       * @param angle Angle of rotation.
-      * @return Rotation of these arcs about the given point by the given angle.
+      * @return Image of this under the specified rotation.
       */
-    def rotate(center: Point, angle: Angle): ArcsOnCircle
+    def rotate(center: Point, angle: Angle): T
+  }
+
+  /**
+    * Objects that have a well-defined center.
+    */
+  trait HasCenter {
+    /**
+      * The natural center of this object.
+      * @return Center of this object.
+      */
+    def center: Point
+  }
+
+  /**
+    * Objects that are associated with a single circle.
+    */
+  trait HasCircle extends HasCenter {
+    /**
+      * The circle associated with this object.
+      * @return Circle of this object.
+      */
+    def circle: Circle
+
+    /**
+      * The natural center of this object, which is the center of its circle.
+      * @return Center of this object.
+      */
+    override def center: Point = circle.center
   }
 }
