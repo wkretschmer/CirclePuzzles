@@ -17,4 +17,15 @@ case class Circle(center: Point, radius: FixedPoint) extends PlanarGeometry.Base
   override def emptyArcs: ArcsOnCircle = ???
 
   override def fullArcs: ArcsOnCircle = ???
+
+  /**
+    * Computes the point on this circle at the specified angle, relative to the direction of the positive x-axis.
+    * @param angle Angle in the counterclockwise direction
+    * @return Point on this circle at the specified angle.
+    */
+  def pointAtAngle(angle: Angle): Point = {
+    val newX = center.x + radius * angle.cos
+    val newY = center.y + radius * angle.sin
+    Point(newX, newY)
+  }
 }
