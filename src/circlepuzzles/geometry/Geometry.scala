@@ -18,6 +18,12 @@ trait Geometry {
   type Circle <: BaseCircle
 
   /**
+    * Type of disks in this geometry. A disk is defined as a closed set of points whose boundary is a circle. Depending
+    * on context, this can either be the interior or exterior of a circle.
+    */
+  type Disk <: BaseDisk
+
+  /**
     * Type of arcs. An arc is defined as a set of points on a circle between a given start and end point, inclusive.
     */
   type Arc <: BaseArc
@@ -26,12 +32,6 @@ trait Geometry {
     * Type of disjoint arc segments on a single circle.
     */
   type ArcsOnCircle <: BaseArcsOnCircle
-
-  /**
-    * Type of disks in this geometry. A disk is defined as a closed set of points whose boundary is a circle. Depending
-    * on context, this can either be the interior or exterior of a circle.
-    */
-  type Disk <: BaseDisk
 
 
   // Base traits for type members
