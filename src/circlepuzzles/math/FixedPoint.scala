@@ -1,6 +1,6 @@
 package circlepuzzles.math
 
-import java.math.{BigDecimal, MathContext, RoundingMode}
+import java.math.{BigDecimal, MathContext}
 
 import org.nevec.rjm.BigDecimalMath
 
@@ -12,16 +12,16 @@ import scala.util.Random
   * means that `FixedPoint` instances are compared using fewer digits than are used for computation.
   *
   * This is to be used in place of Scala's [[scala.math.BigDecimal]] wrapper where fixed precision is needed.
-  * @param bd Arbitrary precision `BigDecimal` that this instance will approximate using `FixedPoint.computeScale`
-  * digits after the decimal point. If rounding is necessary, this will use `FixedPoint.roundingMode`.
+  * @param bd Arbitrary precision `BigDecimal` that this instance will approximate using `FixedPoint.ComputeScale`
+  * digits after the decimal point. If rounding is necessary, this will use `FixedPoint.RoundingMode`.
   */
 class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
   import FixedPoint._
 
   /**
-    * Underlying `BigDecimal` representation, which necessarily has scale `FixedPoint.computeScale`.
+    * Underlying `BigDecimal` representation, which necessarily has scale `FixedPoint.ComputeScale`.
     */
-  val value = bd.setScale(computeScale, roundingMode)
+  val value = bd.setScale(ComputeScale, RoundingMode)
 
   /**
     * Computes the sum `this + that`.
@@ -41,7 +41,7 @@ class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
   /**
     * Computes the quotient `this / that`.
     */
-  def /(that: FixedPoint): FixedPoint = new FixedPoint(value.divide(that.value, computeScale, roundingMode))
+  def /(that: FixedPoint): FixedPoint = new FixedPoint(value.divide(that.value, ComputeScale, RoundingMode))
 
   /**
     * Computes the absolute value `|this|`
@@ -60,13 +60,13 @@ class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
 
   /**
     * Computes a rounded version of this `FixedPoint` that should be used for comparison with other `FixedPoint`
-    * instances. This works by adding a fixed random offset, then rounding to `FixedPoint.compareScale` places after the
+    * instances. This works by adding a fixed random offset, then rounding to `FixedPoint.CompareScale` places after the
     * decimal point.
     * @return A `BigDecimal` that can be used to compare `FixedPoint` instances.
     */
   def compareValue: BigDecimal = {
-    val unrounded = value.add(offset)
-    unrounded.setScale(compareScale, roundingMode)
+    val unrounded = value.add(Offset)
+    unrounded.setScale(CompareScale, RoundingMode)
   }
 
   /**
@@ -132,17 +132,17 @@ object FixedPoint {
   /**
     * Number of decimal places after the decimal point stored for `FixedPoint` instances.
     */
-  val computeScale = 40
+  val ComputeScale = 40
 
   /**
     * Number of decimal places after the decimal points used to compare `FixedPoint` instances.
     */
-  val compareScale = 20
+  val CompareScale = 20
 
   /**
     * Rounding mode used for intermediate computation and comparisons.
     */
-  val roundingMode = RoundingMode.HALF_EVEN
+  val RoundingMode = java.math.RoundingMode.HALF_EVEN
 
   /**
     * Randomly generated offset that is added to `FixedPoint` instances before rounding for comparison. The use of
@@ -153,12 +153,12 @@ object FixedPoint {
     * The correctness of code involving `FixedPoint` comparisons will often rely on the assumption that this probability
     * is effectively 0. This is a reasonable assumption if the sum of the number of digits of lost precision and the
     * order of magnitude of the number of `FixedPoint` operations performed is much smaller than the difference
-    * `computeScale - compareScale`. If this assumption ever turns out to be false, the state of the program may become
+    * `ComputeScale - CompareScale`. If this assumption ever turns out to be false, the state of the program may become
     * corrupted.
     */
-  val offset = {
-    val zeros = "0" * compareScale
-    val digits = List.fill(computeScale - compareScale)(Random.nextInt(10))
+  val Offset = {
+    val zeros = "0" * CompareScale
+    val digits = List.fill(ComputeScale - CompareScale)(Random.nextInt(10))
     new BigDecimal("0." + zeros + digits.mkString)
   }
 
@@ -166,18 +166,18 @@ object FixedPoint {
     * `FixedPoint` with value closest to pi/2.
     */
   val HalfPi = {
-    // Need computeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
+    // Need ComputeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
     // end to get the rounding right.
-    val piValue = BigDecimalMath.pi(new MathContext(computeScale + 2, roundingMode))
-    new FixedPoint(piValue.divide(new BigDecimal("2"), computeScale, roundingMode))
+    val piValue = BigDecimalMath.pi(new MathContext(ComputeScale + 2, RoundingMode))
+    new FixedPoint(piValue.divide(new BigDecimal("2"), ComputeScale, RoundingMode))
   }
 
   /**
     * `FixedPoint` with value closest to pi.
     */
   val Pi = {
-    // Need computeScale + 1 digits because there is 1 digit before the decimal point.
-    val piValue = BigDecimalMath.pi(new MathContext(computeScale + 1, roundingMode))
+    // Need ComputeScale + 1 digits because there is 1 digit before the decimal point.
+    val piValue = BigDecimalMath.pi(new MathContext(ComputeScale + 1, RoundingMode))
     new FixedPoint(piValue)
   }
 
@@ -185,9 +185,9 @@ object FixedPoint {
     * `FixedPoint` with value closest to 3*pi/2.
     */
   val ThreeHalvesPi = {
-    // Need computeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
+    // Need ComputeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
     // end to get the rounding right.
-    val piValue = BigDecimalMath.pi(new MathContext(computeScale + 2, roundingMode))
+    val piValue = BigDecimalMath.pi(new MathContext(ComputeScale + 2, RoundingMode))
     new FixedPoint(piValue.multiply(new BigDecimal("1.5")))
   }
 
@@ -195,9 +195,9 @@ object FixedPoint {
     * `FixedPoint` with value closest to 2*pi.
     */
   val TwoPi = {
-    // Need computeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
+    // Need ComputeScale + 2 digits because there is 1 digit before the decimal point, and we need 1 more digit at the
     // end to get the rounding right.
-    val piValue = BigDecimalMath.pi(new MathContext(computeScale + 2, roundingMode))
+    val piValue = BigDecimalMath.pi(new MathContext(ComputeScale + 2, RoundingMode))
     new FixedPoint(piValue.multiply(new BigDecimal("2")))
   }
 
