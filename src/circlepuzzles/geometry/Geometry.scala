@@ -171,11 +171,11 @@ trait Geometry {
 
     /**
       * Rotate about the given point in the counterclockwise direction.
-      * @param center Center of rotation.
+      * @param rotationCenter Center of rotation.
       * @param angle Angle of rotation.
       * @return Image of this under the specified rotation.
       */
-    def rotate(center: Point, angle: Angle): T
+    def rotate(rotationCenter: Point, angle: Angle): T
   }
 
   /**
