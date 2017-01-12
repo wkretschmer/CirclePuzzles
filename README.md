@@ -10,12 +10,11 @@ In general, code is documented wherever possible.
 
 Usage
 -----
-This is implemented as a [Scala](http://www.scala-lang.org/) library. It also uses the [BigDecimalMath](https://arxiv.org/abs/0908.3030) library, which is not included.
+This is implemented as a [Scala](http://www.scala-lang.org/) library.
 
 
 `src/circlepuzzles/example/Example.scala` shows how to define a puzzle in terms of its moves and get its permutation representation. For other queries, see the Scaladoc.
 
 Known Issues
 ------------
-* BigDecimalMath's sine and cosine functions throw exceptions on inputs very close to integer multiples of pi/2. This may later be addressed by removing entirely the dependence on BigDecimalMath and implementing these ourselves.
 * The algorithm for computing part boundaries assumes that part boundaries are simply connected (i.e. moving parts do not have holes). In general, moving parts can only have holes if one move circle is fully contained in another move circle, and their cuts never intersect.
