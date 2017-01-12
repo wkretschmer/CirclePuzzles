@@ -1,7 +1,7 @@
 package circlepuzzles.geometry.planar
 
-import circlepuzzles.geometry.{PlanarGeometry, Angle}
-import circlepuzzles.math.FixedPoint
+import circlepuzzles.geometry.{Angle, PlanarGeometry}
+import circlepuzzles.math.{FixedPoint, UnitArcs}
 
 /**
   * Circles in the Euclidean plane.
@@ -14,9 +14,13 @@ case class Circle(center: Point, radius: FixedPoint) extends PlanarGeometry.Base
     Circle(center.rotate(rotationCenter, angle), radius)
   }
 
-  override def emptyArcs: ArcsOnCircle = ???
+  override def emptyArcs: ArcsOnCircle = {
+    new ArcsOnCircle(this, UnitArcs.Empty)
+  }
 
-  override def fullArcs: ArcsOnCircle = ???
+  override def fullArcs: ArcsOnCircle = {
+    new ArcsOnCircle(this, UnitArcs.FullCircle)
+  }
 
   /**
     * Computes the point on this circle at the specified angle, relative to the direction of the positive x-axis.
