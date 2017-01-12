@@ -204,7 +204,7 @@ object FixedPoint {
     * @return The two argument arc tangent of `y` and `x` in the range [0,2*pi).
     * @throws ArithmeticException If `y` and `x` are both zero.
     */
-  def atan2(y: FixedPoint, x: FixedPoint): FixedPoint = {
+  def atan2Mod2Pi(y: FixedPoint, x: FixedPoint): FixedPoint = {
     mod2Pi(new FixedPoint(BigDecimalMath.atan2(y.value, x.value, ComputeScale)))
   }
 
