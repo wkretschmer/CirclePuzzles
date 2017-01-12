@@ -70,18 +70,26 @@ trait Geometry {
     this: Disk => // Every BaseDisk must also be a Disk
 
     /**
+      * Return an integer indicating the location of the given point relative to this disk.
+      * @param pt Point to test for membership.
+      * @return A negative, zero, or positive integer if the point is respectively on the interior, boundary, or
+      * exterior of this disk.
+      */
+    def containsCompare(pt: Point): Int
+
+    /**
       * Test if the given point is in the interior or on the boundary of this disk.
       * @param pt Point to test for membership.
       * @return True if and only if this disk contains the given point.
       */
-    def contains(pt: Point): Boolean
+    def contains(pt: Point): Boolean = containsCompare(pt) <= 0
 
     /**
       * Test if the given point is in the interior of this disk.
       * @param pt Point to test for membership.
       * @return True if and only if this disk strictly contains the given point.
       */
-    def strictlyContains(pt: Point): Boolean
+    def strictlyContains(pt: Point): Boolean = containsCompare(pt) < 0
   }
 
   /**
