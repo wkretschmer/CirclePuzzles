@@ -297,10 +297,7 @@ object BigDecimalMath {
         .multiply(xSquared)
         .divide(new BigDecimal(denominator), scale, RoundingMode)
 
-      if(nextTerm.signum() == 0) {
-        println(iter)
-        next
-      }
+      if(nextTerm.signum() == 0) next
       else recursiveSin(next, nextTerm, nextIter)
     }
 
