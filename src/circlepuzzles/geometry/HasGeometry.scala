@@ -6,3 +6,8 @@ package circlepuzzles.geometry
   * @param geom The particular geometry to use for computations.
   */
 abstract class HasGeometry(val geom: Geometry)
+
+/**
+  * Classes that use Euclidean planar geometry.
+  */
+abstract class HasPlanarGeometry extends HasGeometry(PlanarGeometry)
