@@ -4,7 +4,7 @@ import circlepuzzles.geometry.{PlanarGeometry, Angle}
 import circlepuzzles.math.FixedPoint
 
 /**
-  * Immutable circles in the Euclidean plane.
+  * Circles in the Euclidean plane.
   * @param center Center of this circle.
   * @param radius Positive radius of this circle.
   */

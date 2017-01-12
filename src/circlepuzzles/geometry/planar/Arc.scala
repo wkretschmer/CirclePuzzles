@@ -4,8 +4,8 @@ import circlepuzzles.geometry.{Angle, PlanarGeometry}
 import circlepuzzles.math.FixedPoint
 
 /**
-  * Immutable arcs on the plane. This represents a nonempty closed arc that spans from `start` to `end` in the
-  * counterclockwise direction.
+  * Arcs on the plane. This represents a nonempty closed arc that spans from `start` to `end` in the counterclockwise
+  * direction.
   *
   * If `start < end`, the arc has angle `end - start`. If `start == end`, represents a full circle. If `start > end`,
   * the arc has angle `2*pi - (start - end).`

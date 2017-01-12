@@ -4,7 +4,7 @@ import circlepuzzles.geometry.{PlanarGeometry, Angle}
 import circlepuzzles.math.FixedPoint
 
 /**
-  * Immutable points in the Euclidean plane. Points are represented by their (x, y) coordinates.
+  * Points in the Euclidean plane. Points are represented by their (x, y) coordinates.
   * @param x X-coordinate of this point.
   * @param y Y-coordinate of this point.
   */

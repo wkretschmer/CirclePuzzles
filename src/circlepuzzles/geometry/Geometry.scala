@@ -3,6 +3,9 @@ package circlepuzzles.geometry
 /**
   * Objects that specify computations for a particular two-dimensional plane-like geometric setting. Subclasses of this
   * trait are generally singleton objects.
+  *
+  * The types `Point`, `Circle`, `Disk`, and `Arc` must correctly implement `equals` and `hashCode` methods according to
+  * the [[Object]] contract. These types and `ArcsOnCircle` must all be immutable.
   */
 trait Geometry {
   // Type members

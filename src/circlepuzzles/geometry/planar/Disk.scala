@@ -3,7 +3,7 @@ package circlepuzzles.geometry.planar
 import circlepuzzles.geometry.{PlanarGeometry, Angle}
 
 /**
-  * Immutable disks in the Euclidean plane. A disk is uniquely defined as the interior of a circle.
+  * Disks in the Euclidean plane. A disk is uniquely defined as the interior of a circle.
   * @param circle Boundary of this disk.
   */
 case class Disk(circle: Circle) extends PlanarGeometry.BaseDisk {

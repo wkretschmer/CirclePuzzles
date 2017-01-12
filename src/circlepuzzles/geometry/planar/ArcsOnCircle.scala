@@ -2,6 +2,9 @@ package circlepuzzles.geometry.planar
 
 import circlepuzzles.geometry.{PlanarGeometry, Angle}
 
+/**
+  * Arcs around a circle in the Euclidean plane.
+  */
 class ArcsOnCircle extends PlanarGeometry.BaseArcsOnCircle {
   override def circle: Circle = ???
 
