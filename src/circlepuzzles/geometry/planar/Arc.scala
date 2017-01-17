@@ -17,7 +17,7 @@ case class Arc(circle: Circle, start: Angle, end: Angle) extends PlanarGeometry.
   override def rotate(rotationCenter: Point, angle: Angle): Arc = {
     val rotatedCircle = circle.rotate(rotationCenter, angle)
     val rotatedStart = new Angle(FixedPoint.mod2Pi(start.radians + angle.radians))
-    val rotatedEnd = new Angle(FixedPoint.mod2Pi(start.radians + angle.radians))
+    val rotatedEnd = new Angle(FixedPoint.mod2Pi(end.radians + angle.radians))
     Arc(rotatedCircle, rotatedStart, rotatedEnd)
   }
 
