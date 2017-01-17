@@ -37,14 +37,14 @@ class ArcsOnCircle(override val circle: Circle, val unitArcs: UnitArcs) extends 
     val distSquared = dx.pow(2) + dy.pow(2)
     val dist = sqrt(distSquared)
     if(dist >= thisRadius + diskRadius) { // Circles don't intersect or are tangent at one point
-      new ArcsOnCircle(circle, UnitArcs.Empty)
+      circle.emptyArcs
     }
     else if(dist <= (thisRadius - diskRadius).abs) { // Circle of smaller radius contained in the other
       if(thisRadius < diskRadius) { // this contained in that
-        new ArcsOnCircle(circle, UnitArcs.FullCircle)
+        this
       }
       else { // that contained in this, or circles are equal
-        new ArcsOnCircle(circle, UnitArcs.Empty)
+        circle.emptyArcs
       }
     }
     else {
@@ -64,8 +64,8 @@ class ArcsOnCircle(override val circle: Circle, val unitArcs: UnitArcs) extends 
       val intersection2Y = midY + h * dx / dist
       val angle2 = atan2Mod2Pi(intersection2Y - center.y, intersection2X - center.x)
       // It is not at all obvious that the arc necessarily starts at angle1 and ends at angle2. One can verify it by
-      // considering the possible signs of dx and dy.
-      new ArcsOnCircle(circle, UnitArcs(angle1, angle2))
+      // considering the possible signs of dx and dy. We then take the intersection with this.
+      new ArcsOnCircle(circle, UnitArcs(angle1, angle2).intersection(unitArcs))
     }
   }
 
