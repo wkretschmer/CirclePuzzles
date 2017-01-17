@@ -11,14 +11,27 @@ trait GeometricPuzzle extends GeometricPart {
   import geom._
 
   /**
+    * Turn an iterable of arcs grouped around particular circles into individual arcs. Arcs should be split at any
+    * intersections with other arcs.
+    * @param grouped Iterable of arcs grouped by circle.
+    * @return A list of individual arcs such that any intersection between two arcs is an endpoint of both arcs.
+    */
+  def flatten(grouped: Iterable[ArcsOnCircle]): Iterable[Arc]
+
+  /**
+    * Produce an empty sorted set for arcs that all start or end at a single point. The boolean flag in such an entry
+    * is true if the arc starts at this point, and false if it ends at this point. This set is sorted in a clockwise
+    * direction, with the goal of making adjacent arcs in the set belong to individual parts.
+    * @return An empty sorted set that compares arcs sharing a start or end point.
+    */
+  def emptySortedArcs(): util.TreeSet[(Arc, Boolean)]
+
+  /**
     * Circle puzzles. A puzzle is defined by its atomic moves. Each move rotates its disk's interior by a fixed fraction
     * of 2*pi. This action determines the possible states of the puzzle.
-    *
-    * Most fields in this class are lazy vals because they are expensive to compute and should be memoized. They are
-    * lazy so one doesn't have to pay the cost of computing those fields in the constructor.
     * @param moves Allowed moves that generate this puzzle.
     */
-  abstract class Puzzle(moves: Move*) {
+  class Puzzle(moves: Move*) {
     /**
       * A list of the moves that generate this puzzle.
       */
@@ -29,8 +42,10 @@ trait GeometricPuzzle extends GeometricPart {
       * the move `Circle`s under the action of rotation by `Move`s in `moves`.
       *
       * This may not terminate for infinite puzzles (i.e. puzzles that jumble).
+      * @return All cuts in this puzzle, grouped by circle. Distinct entries in the returned iterable correspond to
+      * different circles.
       */
-    lazy val groupedCuts: Iterable[ArcsOnCircle] = {
+    def groupedCuts: Iterable[ArcsOnCircle] = {
       // Start with one complete cut for each move's circle
       val allCuts = mutable.Map(movesList.map(move => (move.disk.circle, move.disk.circle.fullArcs)):_*)
 
@@ -92,30 +107,27 @@ trait GeometricPuzzle extends GeometricPart {
     /**
       * The set of cuts in this puzzle as an iterable over individual arcs that start and end at intersections with
       * other arcs. These are the arcs in a full unbandaging of this puzzle.
+      * @return An iterable without duplicates of all arcs in a full unbandaging of this puzzle.
       */
-    def flatCuts: Iterable[Arc]
+    def flatCuts: Iterable[Arc] = {
+      flatten(groupedCuts)
+    }
 
     /**
-      * Produce an empty sorted set for arcs that all start or end at a single point. The boolean flag in such an entry
-      * is true if the arc starts at this point, and false if it ends at this point. This set is sorted in a clockwise
-      * direction, with the goal of making adjacent arcs in the set belong to individual parts.
-      * @return An empty sorted set that compares arcs sharing a start or end point.
-      */
-    def emptySortedArcs(): util.TreeSet[(Arc, Boolean)]
-
-    /**
-      * The parts in this puzzle. The infinite exterior is included as one of these parts.
+      * The parts in this puzzle. The non-moving (possibly infinite) exterior is included as one of these parts, if
+      * applicable.
       *
       * Note: this assumes that the boundary of all parts are nonintersecting continuous loops in the plane. This
       * assumption may be violated for puzzles that have disconnected moves, i.e. moves between which parts cannot be
       * exchanged. All other fields that depend on this may require the same assumption.
       */
-    lazy val parts: List[Part] = {
+    def parts: List[Part] = {
       // Map each arc intersection point to the set of arcs that start or end there. This is basically a graph where the
-      // vertices are arc intersections and the edges are (Arc, Boolean) pairs where the boolean value is true if and only
-      // if the arc starts at that vertex. Thus, a single TreeSet in the map is basically an adjacency list for the
+      // vertices are arc intersections and the edges are (Arc, Boolean) pairs where the boolean value is true if and
+      // only if the arc starts at that vertex. Thus, a single TreeSet in the map is basically an adjacency set for the
       // corresponding point of intersection. The arcs around a single vertex are sorted in such a way that any two
       // adjacent sorted arcs belong to the same part. The ordering implicitly wraps around.
+      // TODO could this be made immutable without hurting performance?
       val arcsByIntersection = mutable.Map[Point, util.TreeSet[(Arc, Boolean)]]()
       for(arc <- flatCuts) {
         // Make an empty sorted set of arcs for both intersections if they don't exist already, then add the arc to the
@@ -126,8 +138,8 @@ trait GeometricPuzzle extends GeometricPart {
 
       // Collect all parts in a single list
       var allParts = List[Part]()
-      // Repeat while there exists a nonempty adjacency list, which implies there exists an edge that hasn't been added to
-      // a part yet
+      // Repeat while there exists a nonempty adjacency set, which implies there exists an edge that hasn't been added
+      // to a part yet
       var next = arcsByIntersection.find(!_._2.isEmpty)
       while(next.nonEmpty) {
         val (startPoint, arcs) = next.get
@@ -135,12 +147,12 @@ trait GeometricPuzzle extends GeometricPart {
         val startArc = arcs.first()
 
         // Build up the part by collecting adjacent arcs that belong to its boundary until we loop back around to the
-        // start vertex. This is where we use the fact that the adjacency lists are sorted.
+        // start vertex. This is where we use the fact that the adjacency sets are sorted.
         def makePartBoundary(currentArc: (Arc, Boolean)): List[Arc] = {
           val (arc, startedAtPrevious) = currentArc
-          // Remove the arc from the previous adjacency list. Notice: we only remove the arc from one (not both) of its
+          // Remove the arc from the previous adjacency set. Notice: we only remove the arc from one (not both) of its
           // endpoints. This is because each arc belongs to exactly two pieces, and we get the two pieces by traversing
-          // once in each direction. The direction in which we traverse the arc determines which piece the arc belongs to.
+          // once in each direction. The direction of traversal determines which piece the arc belongs to.
           val previousPoint = if(startedAtPrevious) arc.startPoint else arc.endPoint
           arcsByIntersection(previousPoint).remove(currentArc)
 
@@ -166,13 +178,13 @@ trait GeometricPuzzle extends GeometricPart {
     /**
       * Maps each part to a unique integer ID in the range `[0, parts.size)`.
       */
-    lazy val partIDs: Map[Part, Int] = parts.zipWithIndex.toMap
+    def partIDs: Map[Part, Int] = parts.zipWithIndex.toMap
 
     /**
-      * For each move, a list of `(move, map)` pairs where the map is from parts to parts, and represents the image under
-      * that move of each part. Note that this ignores part orientation.
+      * For each move, a list of `(move, map)` pairs where the map is from parts to parts, and represents the image
+      * under that move of each part. Note that this ignores part orientation.
       */
-    lazy val partPermutations: List[(Move, Map[Part, Part])] = {
+    def partPermutations: List[(Move, Map[Part, Part])] = {
       movesList.map{move =>
         val permutation = parts.map{part =>
           (part, part.image(move))
@@ -184,7 +196,7 @@ trait GeometricPuzzle extends GeometricPart {
     /**
       * Like `partPermutations`, but the maps are instead in terms of the integer IDs in `partIDs`.
       */
-    lazy val idPermutations: List[(Move, Map[Int, Int])] = {
+    def idPermutations: List[(Move, Map[Int, Int])] = {
       for((move, permutation) <- partPermutations) yield {
         val idPermutation = for((part, image) <- permutation) yield {
           (partIDs(part), partIDs(image))
@@ -198,11 +210,26 @@ trait GeometricPuzzle extends GeometricPart {
       * `AsPermutation(Transformation(_))`. This also means that each ID is incremented by 1 to be in the range
       * `[1, parts.size]`.
       */
-    lazy val permutationStrings: List[(Move, String)] = {
+    def permutationStrings: List[(Move, String)] = {
       for((move, idPermutation) <- idPermutations) yield {
         val list = List.tabulate(idPermutation.size)(i => idPermutation(i) + 1)
         (move, "[" + list.mkString(",") + "]")
       }
     }
+  }
+
+  /**
+    * Like puzzle, but `groupedCuts` and all fields that depend on it are lazy vals. In other words, all fields are
+    * memoized, but only computed on demand.
+    * @param moves Allowed moves that generate this puzzle.
+    */
+  class LazyCachingPuzzle(moves: Move*) extends Puzzle(moves:_*) {
+    override lazy val groupedCuts = super.groupedCuts
+    override lazy val flatCuts = super.flatCuts
+    override lazy val parts = super.parts
+    override lazy val partIDs = super.partIDs
+    override lazy val partPermutations = super.partPermutations
+    override lazy val idPermutations = super.idPermutations
+    override lazy val permutationStrings = super.permutationStrings
   }
 }
