@@ -3,7 +3,8 @@ package circlepuzzles.puzzle
 import java.util
 import java.util.Comparator
 
-import circlepuzzles.geometry.HasPlanarGeometry
+import circlepuzzles.geometry.{Angle, HasPlanarGeometry}
+import circlepuzzles.geometry.planar.Arc
 import circlepuzzles.math.FixedPoint
 
 object PlanarPuzzle extends GeometricPuzzle with HasPlanarGeometry {
@@ -46,5 +47,23 @@ object PlanarPuzzle extends GeometricPuzzle with HasPlanarGeometry {
     new util.TreeSet[(Arc, Boolean)](comparator)
   }
 
-  override def flatten(grouped: Iterable[ArcsOnCircle]): Iterable[Arc] = ???
+  override def flatten(grouped: Iterable[ArcsOnCircle]): Iterable[Arc] = {
+    val cutsByCircle = for(arcsOnCircle <- grouped) yield {
+      val circle = arcsOnCircle.circle
+      val unitArcs = arcsOnCircle.unitArcs
+      // Compute the set of possible intersections with other circles as angles around this circle
+      val allIntersections = for(otherArcsOnCircle <- grouped ;
+                                 // Iterate through the 0, 1, or 2 intersections
+                                 (angle, otherAngle) <- circle.intersections(otherArcsOnCircle.circle)
+                                 // Only care about intersections that actually exist in the other circle
+                                 if otherArcsOnCircle.unitArcs.contains(otherAngle))
+                             yield angle
+      // Above, we don't explicitly check if the intersections are contained in arcs
+      // This is because splitAtIntersections implicitly does this for us
+      val concreteArcs = unitArcs.splitAtIntersections(allIntersections.toList.distinct.sorted)
+      // Make an arc for each (start, end)
+      for((start, end) <- concreteArcs) yield Arc(circle, new Angle(start), new Angle(end))
+    }
+    cutsByCircle.flatten
+  }
 }
