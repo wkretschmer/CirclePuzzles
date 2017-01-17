@@ -102,13 +102,13 @@ trait Geometry {
     this: Arc => // Every BaseArc must also be an Arc
 
     /**
-      * Attempts to combine two arcs around the same circle. If `this` and `that` belong to the same circle and share at
-      * least one point (possibly an endpoint), this returns `Some(union)`, where `union` is the arc formed by the union
-      * of the arcs. Otherwise, if the arcs are disjoint or belong to different circles, returns `None`.
+      * Attempts to join two arcs around the same circle. If `this` and `that` belong to the same circle and share a
+      * single point (i.e an endpoint), this returns `Some(joined)`, where `joined` is the arc formed by connecting the
+      * arcs at this point. Otherwise, if the arcs are disjoint or belong to different circles, returns `None`.
       * @param that Arc to combine.
-      * @return Union of `this` and `that`, or `None` if they can't be combined.
+      * @return Joining of `this` and `that`, or `None` if they can't be combined.
       */
-    def union(that: Arc): Option[Arc]
+    def join(that: Arc): Option[Arc]
 
     /**
       * The point at which this arc begins, in the counterclockwise direction.

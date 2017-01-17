@@ -30,7 +30,7 @@ trait GeometricPart extends GeometricMove {
       arcs match {
         case first :: second :: rest =>
           // See if we can combine the first and second arcs
-          first.union(second) match {
+          first.join(second) match {
             case Some(combined) =>
               // Use combined arcs, but don't add to the buffer yet because they might be combinable with more arcs
               simplify(combined :: rest, current)
@@ -41,7 +41,7 @@ trait GeometricPart extends GeometricMove {
           }
         case last :: Nil =>
           // See if we can combine the first and last arcs
-          current.head.union(last) match {
+          current.head.join(last) match {
             case Some(combined) =>
               // Call tail on current because we shouldn't include the first arc
               combined :: current.toList.tail

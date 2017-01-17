@@ -36,5 +36,16 @@ case class Arc(circle: Circle, start: Angle, end: Angle) extends PlanarGeometry.
     circle.pointAtAngle(midAngle)
   }
 
-  override def union(that: Arc): Option[Arc] = ???
+  override def join(that: Arc): Option[Arc] = {
+    // Arcs only joinable if they belong to the same circle
+    if(circle == that.circle) {
+      // If this ends where that starts, use this start point and that endpoint
+      if(end == that.start) Some(Arc(circle, start, that.end))
+      // If this starts where that ends, use that start point and this endpoint
+      else if(start == that.end) Some(Arc(circle, that.start, end))
+      // Otherwise arcs can't be joined
+      else None
+    }
+    else None
+  }
 }
