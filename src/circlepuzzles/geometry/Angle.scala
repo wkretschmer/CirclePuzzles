@@ -37,6 +37,12 @@ class Angle(val radians: FixedPoint) {
     * @return A hash code depending only on `radians`.
     */
   override def hashCode: Int = radians.hashCode
+
+  /**
+    * Returns a decimal representation of this angle's measure, in radians.
+    * @return A string representation of this angle.
+    */
+  override def toString: String = s"Angle($radians)"
 }
 
 /**
