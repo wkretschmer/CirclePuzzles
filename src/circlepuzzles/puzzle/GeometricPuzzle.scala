@@ -56,17 +56,19 @@ trait GeometricPuzzle extends GeometricPart {
       /**
         * Add the cuts specified by the given `ArcsOnCircle` to the given mutable cut set. This works by setting
         * `cuts(arcs.circle)` equal to the union of `cuts(arcs.circle)` and `arcs`.
+        * @param arcs Arcs to add.
+        * @param map Mutable cut set.
         * @return `ArcsOnCircle` that previously existed in the mutable cut set around the same circle, or
         * `UnitArcs.Empty` if the key is new.
         */
-      def add(arcs: ArcsOnCircle): ArcsOnCircle = {
+      def add(arcs: ArcsOnCircle, map: mutable.Map[Circle, ArcsOnCircle]): ArcsOnCircle = {
         val circle = arcs.circle
-        allCuts.get(circle) match {
+        map.get(circle) match {
           case None =>
-            allCuts.put(circle, arcs)
+            map.put(circle, arcs)
             circle.emptyArcs
           case Some(existingArcs) =>
-            allCuts.put(circle, existingArcs.sameCircleUnion(arcs))
+            map.put(circle, existingArcs.sameCircleUnion(arcs))
             existingArcs
         }
       }
@@ -88,14 +90,14 @@ trait GeometricPuzzle extends GeometricPart {
                 // Rotate the cuts by rotating the center and arcs by the angle
                 val rotatedArcs = intersection.rotate(move.disk, angle)
                 // Add the rotated arcs, and get any concentric, coradial arcs that were already computed
-                val existingArcs = add(rotatedArcs)
+                val existingArcs = add(rotatedArcs, allCuts)
                 // Compute the newly added arcs by subtracting the arcs we computed previously
                 val newArcs = rotatedArcs.sameCircleDifference(existingArcs)
                 if(newArcs.nonEmpty) {
                   // If any arcs were added, we need to compute their images under all other moves
                   for((otherMove, otherCuts) <- toProcess if otherMove != move) {
                     // Add the new arcs to the toProcess set of the other move
-                    add(newArcs)
+                    add(newArcs, otherCuts)
                   }
                 }
               }
