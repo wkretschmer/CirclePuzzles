@@ -22,9 +22,13 @@ trait GeometricPuzzle extends GeometricPart {
     * Produce an empty sorted set for arcs that all start or end at a single point. The boolean flag in such an entry
     * is true if the arc starts at this point, and false if it ends at this point. This set is sorted in a clockwise
     * direction, with the goal of making adjacent arcs in the set belong to individual parts.
+    *
+    * The behavior of the returned set is undefined if an arc is added that does not have `point` as an endpoint, or
+    * that incorrectly uses the boolean flag.
+    * @param point Shared endpoint of all arcs that will be added to the returned set.
     * @return An empty sorted set that compares arcs sharing a start or end point.
     */
-  def emptySortedArcs(): util.TreeSet[(Arc, Boolean)]
+  def emptySortedArcs(point: Point): util.TreeSet[(Arc, Boolean)]
 
   /**
     * Circle puzzles. A puzzle is defined by its atomic moves. Each move rotates its disk's interior by a fixed fraction
@@ -132,8 +136,8 @@ trait GeometricPuzzle extends GeometricPart {
       for(arc <- flatCuts) {
         // Make an empty sorted set of arcs for both intersections if they don't exist already, then add the arc to the
         // adjacency sets of both endpoints.
-        arcsByIntersection.getOrElseUpdate(arc.startPoint, emptySortedArcs()).add((arc, true))
-        arcsByIntersection.getOrElseUpdate(arc.endPoint, emptySortedArcs()).add((arc, false))
+        arcsByIntersection.getOrElseUpdate(arc.startPoint, emptySortedArcs(arc.startPoint)).add((arc, true))
+        arcsByIntersection.getOrElseUpdate(arc.endPoint, emptySortedArcs(arc.endPoint)).add((arc, false))
       }
 
       // Collect all parts in a single list
