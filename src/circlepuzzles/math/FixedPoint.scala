@@ -223,9 +223,9 @@ object FixedPoint {
   }
 
   /**
-    * Computes the square root of the argument. Returns `Zero` if x is negative.
+    * Computes the square root of the argument. Returns 0 if x is negative.
     * @param x Argument whose square root is to be computed.
-    * @return Nonnegative square root of the argument, or `Zero` if it is negative.
+    * @return Nonnegative square root of the argument, or 0 if it is negative.
     */
   def sqrt(x: FixedPoint): FixedPoint = {
     new FixedPoint(BigDecimalMath.sqrt(x.value, ComputeScale))
@@ -247,5 +247,25 @@ object FixedPoint {
     */
   def cos(theta: FixedPoint): FixedPoint = {
     new FixedPoint(BigDecimalMath.cos(theta.value, ComputeScale))
+  }
+
+  /**
+    * Computes the arc sine of the argument. Returns pi/2 if the argument is greater than 1, and -pi/2 if it is less
+    * than -1.
+    * @param x Argument whose arc sine is to be computed.
+    * @return Arc sine of the argument in the range [-pi/2,pi/2].
+    */
+  def asin(x: FixedPoint): FixedPoint = {
+    new FixedPoint(BigDecimalMath.asin(x.value, ComputeScale))
+  }
+
+  /**
+    * Computes the arc cosine of the argument. Returns 0 if the argument is greater than 1, and pi if it is less
+    * than -1.
+    * @param x Argument whose arc cosine is to be computed.
+    * @return Arc cosine of the argument in the range [0,pi].
+    */
+  def acos(x: FixedPoint): FixedPoint = {
+    new FixedPoint(BigDecimalMath.acos(x.value, ComputeScale))
   }
 }
