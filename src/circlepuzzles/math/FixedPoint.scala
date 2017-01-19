@@ -57,6 +57,11 @@ class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
   def unary_- : FixedPoint = new FixedPoint(value.negate())
 
   /**
+    * Computes the signum function, i.e. -1, 0, or 1 if this is respectively negative, 0, or positive.
+    */
+  def signum: Int = compare(FixedPoint.Zero)
+
+  /**
     * Computes a rounded version of this `FixedPoint` that should be used for comparison with other `FixedPoint`
     * instances. This works by adding a fixed random offset, then rounding to `FixedPoint.CompareScale` places after the
     * decimal point.
@@ -70,8 +75,8 @@ class FixedPoint(bd: BigDecimal) extends Ordered[FixedPoint] {
   /**
     * Compare this and another `FixedPoint` by comparing the corresponding `compareValue`s.
     * @param that `FixedPoint` to compare to.
-    * @return A negative, zero, or positive integer if `this.compareValue` is respectively less than, equal to, or
-    * greater than `that.compareValue`.
+    * @return -1, 0, or 1 if `this.compareValue` is respectively less than, equal to, or greater than
+    * `that.compareValue`.
     */
   override def compare(that: FixedPoint): Int = {
     compareValue.compareTo(that.compareValue)
