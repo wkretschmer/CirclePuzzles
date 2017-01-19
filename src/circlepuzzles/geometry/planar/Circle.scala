@@ -5,11 +5,16 @@ import circlepuzzles.math.{FixedPoint, UnitArcs}
 import circlepuzzles.math.FixedPoint._
 
 /**
-  * Circles in the Euclidean plane.
+  * Circles in the Euclidean plane. Disks in the plane are uniquely defined by circles, so this also subclasses the
+  * `Disk` type.
   * @param center Center of this circle.
   * @param radius Positive radius of this circle.
   */
-case class Circle(center: Point, radius: FixedPoint) extends PlanarGeometry.BaseCircle {
+case class Circle(override val center: Point, radius: FixedPoint) extends PlanarGeometry.BaseCircle
+  with PlanarGeometry.BaseDisk {
+
+  override def circle: Circle = this
+
   override def rotate(rotationCenter: Point, angle: Angle): Circle = {
     // Rotate this by rotating the center, returning a circle with the same radius
     Circle(center.rotate(rotationCenter, angle), radius)
@@ -21,6 +26,13 @@ case class Circle(center: Point, radius: FixedPoint) extends PlanarGeometry.Base
 
   override def fullArcs: ArcsOnCircle = {
     new ArcsOnCircle(this, UnitArcs.FullCircle)
+  }
+
+  override def containsCompare(pt: Point): Int = {
+    // Compare the square of the distance to the center (i.e. dx^2 + dy^2) to the squared radius
+    val dx = circle.center.x - pt.x
+    val dy = circle.center.y - pt.y
+    (dx.pow(2) + dy.pow(2)).compare(circle.radius.pow(2))
   }
 
   /**

@@ -26,7 +26,7 @@ class ArcsOnCircle(override val circle: Circle, val unitArcs: UnitArcs) extends 
     new ArcsOnCircle(circle, unitArcs.difference(that.unitArcs))
   }
 
-  override def intersection(disk: Disk): ArcsOnCircle = {
+  override def intersection(disk: Circle): ArcsOnCircle = {
     // Distances between x and y coordinates
     val dx = disk.center.x - center.x
     val dy = disk.center.y - center.y
