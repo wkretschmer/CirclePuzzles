@@ -50,12 +50,20 @@ case class Vector3D(x: FixedPoint, y: FixedPoint, z: FixedPoint) {
   }
 
   /**
+    * Squared norm of this vector, i.e. `this . this`.
+    * @return Squared norm of this vector.
+    */
+  def normSquared: FixedPoint = {
+    // |x|^2 = x . x
+    dotProduct(this)
+  }
+
+  /**
     * Norm (i.e length) of this vector.
     * @return Norm of this vector as a nonnegative `FixedPoint`.
     */
   def norm: FixedPoint = {
-    // |x| = sqrt(x . x)
-    FixedPoint.sqrt(dotProduct(this))
+    FixedPoint.sqrt(normSquared)
   }
 
   /**
