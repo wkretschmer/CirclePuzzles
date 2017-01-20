@@ -17,3 +17,10 @@ abstract class HasGeometry {
 trait HasPlanarGeometry extends HasGeometry {
   override val geom = PlanarGeometry
 }
+
+/**
+  * Classes that use geometry of the unit sphere.
+  */
+trait HasSphericalGeometry extends HasGeometry {
+  override val geom = SphericalGeometry
+}
