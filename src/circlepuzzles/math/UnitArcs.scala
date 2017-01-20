@@ -17,7 +17,8 @@ package circlepuzzles.math
   * to say that it contains no duplicate `FixedPoint`s.
   *
   * A desirable (but not strictly necessary) property is for the list to alternate between present and non-present arcs.
-  * Such a list is called "simplified". All methods that return `UnitArcs` will simplify their results.
+  * Such a list is called "simplified". All methods that return `UnitArcs` will simplify their results, unless otherwise
+  * specified.
   */
 class UnitArcs(val arcs: List[(FixedPoint, Boolean)]) {
   /**
@@ -219,6 +220,32 @@ class UnitArcs(val arcs: List[(FixedPoint, Boolean)]) {
     }
 
     makeArcs(splitArcs.tail)
+  }
+
+  /**
+    * Mirror these arcs about the X axis.
+    * @return Arcs formed by mirroring `this` about the X axis. The returned arcs are not simplified unless `this` is
+    * simplified.
+    */
+  def mirror: UnitArcs = {
+    // Helper function for inverting an arc list, using the fact that corresponding entries are reversed
+    // It takes the first item off of the arcs not yet processed, and prepends the corresponding arc to the result
+    // Start points of the inverted list correspond to endpoints in this, so we store whether the current arc is present
+    // The returned list is accumulated in the result argument of this function
+    def helper(arcList: ArcList, currPresent: Boolean, result: ArcList): UnitArcs = {
+      arcList match {
+        case (start, nextPresent) :: rest =>
+          // Prepend 2*pi - start, paired with whether the current arc was present
+          helper(rest, nextPresent, (FixedPoint.TwoPi - start, currPresent) :: result)
+        case Nil =>
+          // Prepend zero
+          new UnitArcs((FixedPoint.Zero, currPresent) :: result)
+      }
+    }
+
+    // Don't pass the head (i.e. zero), but pass whether the arc starting at zero is present
+    // The result is initially empty
+    helper(arcs.tail, arcs.head._2, List())
   }
 }
 
