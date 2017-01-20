@@ -139,7 +139,6 @@ trait Geometry {
       * Compute the union of this with the given arcs by joining overlapping segments.
       * @param that Arcs around the same circle (i.e. requires `this.circle == that.circle`).
       * @return `ArcsOnCircle` containing all arcs that belong to either `this` or `that`.
-      * @throws IllegalArgumentException If `this.circle != that.circle`. Not every implementation checks this strictly.
       */
     def sameCircleUnion(that: ArcsOnCircle): ArcsOnCircle
 
@@ -147,7 +146,6 @@ trait Geometry {
       * Compute the difference of this with the given arcs by subtracting overlapping segments.
       * @param that Arcs around the same circle (i.e. requires `this.circle == that.circle`).
       * @return `ArcsOnCircle` containing all arcs that belong to `this` but not `that`.
-      * @throws IllegalArgumentException If `this.circle != that.circle`. Not every implementation checks this strictly.
       */
     def sameCircleDifference(that: ArcsOnCircle): ArcsOnCircle
 
