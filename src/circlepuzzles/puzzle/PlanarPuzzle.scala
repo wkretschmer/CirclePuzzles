@@ -7,6 +7,9 @@ import circlepuzzles.geometry.{Angle, HasPlanarGeometry}
 import circlepuzzles.geometry.planar.Arc
 import circlepuzzles.math.FixedPoint
 
+/**
+  * Circle puzzles in the Euclidean plane.
+  */
 object PlanarPuzzle extends GeometricPuzzle with HasPlanarGeometry {
   import geom._
 
