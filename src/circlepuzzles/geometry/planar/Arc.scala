@@ -15,10 +15,8 @@ import circlepuzzles.math.FixedPoint
   */
 case class Arc(circle: Circle, start: Angle, end: Angle) extends PlanarGeometry.BaseArc {
   override def rotate(rotationCenter: Point, angle: Angle): Arc = {
-    val rotatedCircle = circle.rotate(rotationCenter, angle)
-    val rotatedStart = new Angle(FixedPoint.mod2Pi(start.radians + angle.radians))
-    val rotatedEnd = new Angle(FixedPoint.mod2Pi(end.radians + angle.radians))
-    Arc(rotatedCircle, rotatedStart, rotatedEnd)
+    // Rotate the circle, start angle, and end angle
+    Arc(circle.rotate(rotationCenter, angle), start + angle, end + angle)
   }
 
   // Memoized

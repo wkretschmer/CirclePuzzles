@@ -20,6 +20,31 @@ class Angle(val radians: FixedPoint) {
   def cos: FixedPoint = FixedPoint.cos(radians)
 
   /**
+    * Angle addition.
+    * @param that Angle to add
+    * @return Sum of the angles `this + that`.
+    */
+  def +(that: Angle): Angle = {
+    new Angle(FixedPoint.mod2Pi(radians + that.radians))
+  }
+
+  /**
+    * The explement of this angle, i.e. the angle that can be added to this to give a full circle.
+    * @return Explement of this angle.
+    */
+  def explement: Angle = {
+    new Angle(FixedPoint.TwoPi - radians)
+  }
+
+  /**
+    * Memoize this angle.
+    * @return A memoized angle equivalent to `this`.
+    */
+  def memoized: MemoizedAngle = {
+    new MemoizedAngle(radians)
+  }
+
+  /**
     * Tests if `that` is an equal `Angle`. Two angles are equal if and only if their values in radians are equal.
     * @param that Object to compare to.
     * @return True if and only if `this` and `that` are equal angles.

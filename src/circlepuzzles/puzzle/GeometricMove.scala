@@ -27,6 +27,6 @@ trait GeometricMove extends HasGeometry {
       * a subset of the geometry, these are the angles of the nontrivial powers of this rotation. So, this consists of
       * the angles with value `angle.radians, ... , (increment - 1) * angle.radians`.
       */
-    val nonzeroAngles = List.iterate(angle, increment - 1)(a => new MemoizedAngle(a.radians + angle.radians))
+    val nonzeroAngles = List.iterate(angle, increment - 1)(a => (a + angle).memoized)
   }
 }
