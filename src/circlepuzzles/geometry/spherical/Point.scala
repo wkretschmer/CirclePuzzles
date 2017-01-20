@@ -20,6 +20,14 @@ case class Point(x: FixedPoint, y: FixedPoint, z: FixedPoint) extends SphericalG
     this(theta.cos * phi.sin, theta.sin * phi.sin, phi.cos)
   }
 
+  /**
+    * Constructs a point from the given 3D vector.
+    * @param vector3D A vector with norm 1.
+    */
+  def this(vector3D: Vector3D) = {
+    this(vector3D.x, vector3D.y, vector3D.z)
+  }
+
   override def rotate(rotationCenter: Point, angle: Angle): Point = {
     // See Wikipedia: https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
     // Sine and cosine of the angle
