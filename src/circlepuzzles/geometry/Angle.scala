@@ -37,6 +37,14 @@ class Angle(val radians: FixedPoint) {
   }
 
   /**
+    * The supplement of this angle, i.e. the angle that can be added to this to give a half circle.
+    * @return Supplement of this angle.
+    */
+  def supplement: Angle = {
+    new Angle(FixedPoint.mod2Pi(FixedPoint.Pi - radians))
+  }
+
+  /**
     * Memoize this angle.
     * @return A memoized angle equivalent to `this`.
     */
