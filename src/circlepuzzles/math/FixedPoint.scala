@@ -203,11 +203,10 @@ object FixedPoint {
   /**
     * Computes the angle theta whose tangent equals the ratio `y / x` and is in the same quadrant as `(y, x)`. Note that
     * this method differs from the standard definition of `atan2` methods in that it computes the result to be in the
-    * range [0,2*pi).
+    * range [0,2*pi). Returns 0 if `x = y = 0`.
     * @param y Y-coordinate.
     * @param x X-coordinate.
     * @return The two argument arc tangent of `y` and `x` in the range [0,2*pi).
-    * @throws ArithmeticException If `y` and `x` are both zero.
     */
   def atan2Mod2Pi(y: FixedPoint, x: FixedPoint): FixedPoint = {
     mod2Pi(new FixedPoint(BigDecimalMath.atan2(y.value, x.value, ComputeScale)))

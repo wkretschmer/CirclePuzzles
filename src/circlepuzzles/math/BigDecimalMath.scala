@@ -249,12 +249,12 @@ object BigDecimalMath {
   }
 
   /**
-    * Computes the arc tangent of two arguments. This can also be seen as returning an angle
+    * Computes the arc tangent of two arguments. This can also be seen as returning an angle of the corresponding polar
+    * coordinates. Returns 0 if `x = y = 0`.
     * @param y Y-coordinate.
     * @param x X-coordinate.
     * @param scale Scale of intermediate computations and the returned value.
     * @return Arc tangent of the arguments, rounded to the given scale. The returned answer is in the range (-pi,pi].
-    * @throws ArithmeticException If `y` and `x` are both zero.
     */
   def atan2(y: BigDecimal, x: BigDecimal, scale: Int): BigDecimal = {
     // See Wikipedia: https://en.wikipedia.org/wiki/Atan2#Definition_and_computation
@@ -271,7 +271,7 @@ object BigDecimalMath {
     else { // x zero
       if(signY > 0) halfPi(scale)
       else if(signY < 0) halfPi(scale).negate()
-      else throw new ArithmeticException("atan2(0,0)")
+      else BigDecimal.ZERO.setScale(scale)
     }
   }
 
