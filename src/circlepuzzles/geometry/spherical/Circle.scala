@@ -1,7 +1,7 @@
 package circlepuzzles.geometry.spherical
 
 import circlepuzzles.geometry.{Angle, SphericalGeometry}
-import circlepuzzles.math.{FixedPoint, UnitArcs}
+import circlepuzzles.math.UnitArcs
 
 /**
   * Circle on the unit sphere. A circle is defined as the set of points whose distance in radians to a given center
