@@ -10,6 +10,16 @@ import circlepuzzles.math.FixedPoint
   * @param z Z-coordinate of this point.
   */
 case class Point(x: FixedPoint, y: FixedPoint, z: FixedPoint) extends SphericalGeometry.BasePoint {
+  /**
+    * Constructs a point from the given polar coordinates.
+    * @param theta Azimuth angle on the XY plane.
+    * @param phi Polar angle with respect to the Z axis. Does not necessarily have to be in the range [0,pi]. If the
+    * angle is in the range (pi,2pi), this returns the point opposite `(theta, phi - pi)`.
+    */
+  def this(theta: Angle, phi: Angle) = {
+    this(theta.cos * phi.sin, theta.sin * phi.sin, phi.cos)
+  }
+
   override def rotate(rotationCenter: Point, angle: Angle): Point = {
     // See Wikipedia: https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
     // Sine and cosine of the angle
@@ -35,11 +45,31 @@ case class Point(x: FixedPoint, y: FixedPoint, z: FixedPoint) extends SphericalG
   }
 
   /**
+    * Returns a representation of this point in polar coordinates.
+    * @return Angles `(theta, phi)` where `theta` is the azimuth angle on the XY plane, and `phi` is the polar angle
+    * with respect to the Z axis.
+    */
+  def toPolar: (Angle, Angle) = {
+    val theta = FixedPoint.atan2Mod2Pi(y, x)
+    val phi = FixedPoint.acos(z)
+    (new Angle(theta), new Angle(phi))
+  }
+
+  /**
     * Returns a representation of this point as a vector in 3-space.
     * @return A vector whose coordinates are the same as corresponding coordinates of this point.
     */
   def toVector3D: Vector3D = {
     Vector3D(x, y, z)
+  }
+
+  /**
+    * Returns the point opposite from this point on the unit sphere. This is equivalent to the entrywise negation of
+    * this point.
+    * @return Point opposite from this point.
+    */
+  def unary_- : Point = {
+    Point(-x, -y, -z)
   }
 
   /**
@@ -74,10 +104,13 @@ case class Point(x: FixedPoint, y: FixedPoint, z: FixedPoint) extends SphericalG
         val prodSign = prodCoord.signum
         // Either all entries must have the same signs, or the product must be the 0 vector
         prodSign == 0 || thisSign == prodSign
+      case _ =>
+        // TODO fail fast here?
+        false
     }
     // Return the angle if the cross product is in the same direction
     if(sameDirection) convexAngle
     // Otherwise, return the explementary angle
-    else new Angle(FixedPoint.TwoPi - convexAngle.radians)
+    else convexAngle.explement
   }
 }
