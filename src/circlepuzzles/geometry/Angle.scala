@@ -92,4 +92,6 @@ class MemoizedAngle(radians: FixedPoint) extends Angle(radians) {
     * The cosine of this angle. Memoized.
     */
   override val cos = super.cos
+
+  override def memoized: MemoizedAngle = this
 }
