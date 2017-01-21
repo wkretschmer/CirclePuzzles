@@ -23,10 +23,12 @@ object PlanarPuzzle extends GeometricPuzzle with HasPlanarGeometry {
 
       // First compute the angle of the line tangent to both arcs in the direction along the arc away from the
       // intersection point. Whether we add or subtract pi/2 depends on whether the arc starts or ends here.
-      val arc1Angle = if(arc1StartsHere) FixedPoint.mod2Pi(arc1.start.radians + FixedPoint.HalfPi)
-      else FixedPoint.mod2Pi(arc1.end.radians - FixedPoint.HalfPi)
-      val arc2Angle = if(arc2StartsHere) FixedPoint.mod2Pi(arc2.start.radians + FixedPoint.HalfPi)
-      else FixedPoint.mod2Pi(arc2.end.radians - FixedPoint.HalfPi)
+      val arc1Angle =
+        if(arc1StartsHere) FixedPoint.mod2Pi(arc1.start.radians + FixedPoint.HalfPi)
+        else FixedPoint.mod2Pi(arc1.end.radians - FixedPoint.HalfPi)
+      val arc2Angle =
+        if(arc2StartsHere) FixedPoint.mod2Pi(arc2.start.radians + FixedPoint.HalfPi)
+        else FixedPoint.mod2Pi(arc2.end.radians - FixedPoint.HalfPi)
 
       // If the angles are not the same, then order by whichever comes first in a counterclockwise direction
       val angleCompare = arc1Angle.compare(arc2Angle)
