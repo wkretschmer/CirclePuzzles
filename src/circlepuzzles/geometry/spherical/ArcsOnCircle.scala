@@ -108,8 +108,10 @@ class ArcsOnCircle(override val circle: Circle, val zero: Point, val unitArcs: U
       // Circles have opposite centers, so counterclockwise direction is opposite; need to mirror
       else that.unitArcs.mirror
     // Angle that the arcs need to be rotated around this.center so they start at this.zero instead of that.zero
-    // This is the same as the angle between that.zero and this.zero with respect to this.center
-    val angle = center.angle(that.zero, zero).radians
+    // This is the same as the angle between this.zero and that.zero with respect to this.center
+    // For example, if that.zero is 1 radian from this.zero, arcs that start at that.zero start at this.zero + 1 radian
+    // So, thoseArcsUnRotated would have to be rotated by 1 radian to be in the frame of reference of this.zero
+    val angle = center.angle(zero, that.zero).radians
     // Rotate by the angle
     thoseArcsUnrotated.rotate(angle)
   }
