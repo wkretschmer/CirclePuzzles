@@ -282,7 +282,6 @@ object BigDecimalMath {
     * @return Sine of the argument, rounded to the given scale.
     */
   def sin(x: BigDecimal, scale: Int): BigDecimal = {
-    // TODO consider making this more efficient by calling cos or taking x mod 2*pi
     val xSquared = x.pow(2)
 
     // Adds one term from the Taylor series, or returns the result if it has converged.
@@ -313,7 +312,6 @@ object BigDecimalMath {
     * @return Cosine of the argument, rounded to the given scale.
     */
   def cos(x: BigDecimal, scale: Int): BigDecimal = {
-    // TODO consider implementing a series for cos
     // cos(x) = sin(x + pi/2)
     sin(x.add(halfPi(scale)), scale)
   }

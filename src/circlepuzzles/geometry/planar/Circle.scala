@@ -55,8 +55,6 @@ case class Circle(override val center: Point, radius: FixedPoint) extends Planar
     * center of `that` to the point of intersection. The returned angles are in the range [0,2*pi).
     */
   def intersections(that: Circle): Set[(FixedPoint, FixedPoint)] = {
-    // TODO: it would be nice to remove some of the duplicate code between this and arcsOnCircle.intersection
-    // TODO: should this return Angles instead of FixedPoints?
     // Distances between x and y coordinates
     val dx = that.center.x - center.x
     val dy = that.center.y - center.y

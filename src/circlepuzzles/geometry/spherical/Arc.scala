@@ -78,7 +78,6 @@ class Arc(override val center: Point, override val startPoint: Point, override v
 
   override def hashCode: Int = {
     // Because there are two distinct representations, we need to hash both of them
-    // TODO: is there a cheaper / more elegant way to do this? Does this hashCode work?
     (center, startPoint, endPoint).hashCode + (-center, endPoint, startPoint).hashCode
   }
 }

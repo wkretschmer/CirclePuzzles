@@ -19,7 +19,6 @@ class ArcsOnCircle(override val circle: Circle, val zero: Point, val unitArcs: U
   }
 
   override def intersection(disk: Disk): ArcsOnCircle = {
-    // TODO see if there is a reasonable way to remove duplicate code in Circle.intersections
     // See https://gis.stackexchange.com/questions/48937/calculating-intersection-of-two-circles
     // We use the same variable names as above
     // x1 and x2 are the circle centers

@@ -133,7 +133,6 @@ trait GeometricPuzzle extends GeometricPart {
       // only if the arc starts at that vertex. Thus, a single TreeSet in the map is basically an adjacency set for the
       // corresponding point of intersection. The arcs around a single vertex are sorted in such a way that any two
       // adjacent sorted arcs belong to the same part. The ordering implicitly wraps around.
-      // TODO could this be made immutable without hurting performance?
       val arcsByIntersection = mutable.Map[Point, util.TreeSet[(Arc, Boolean)]]()
       for(arc <- flatCuts) {
         // Make an empty sorted set of arcs for both intersections if they don't exist already, then add the arc to the
