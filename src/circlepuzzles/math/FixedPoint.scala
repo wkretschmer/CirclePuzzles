@@ -135,7 +135,7 @@ object FixedPoint {
   /**
     * Number of decimal places after the decimal point stored for `FixedPoint` instances.
     */
-  val ComputeScale = 40
+  val ComputeScale = 80
 
   /**
     * Number of decimal places after the decimal points used to compare `FixedPoint` instances.
