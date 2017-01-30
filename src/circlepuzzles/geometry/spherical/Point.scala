@@ -105,16 +105,13 @@ case class Point(x: FixedPoint, y: FixedPoint, z: FixedPoint) extends SphericalG
     // The cross product of the projected vectors will be in the same direction as this if we have the desired angle
     val crossProduct = startProj.crossProduct(endProj)
     // Test if the cross product is in the same direction as this (or 0) by looking comparing signs entrywise
-    val sameDirection = productIterator.zip(crossProduct.productIterator).forall {
-      case (thisCoord: FixedPoint, prodCoord: FixedPoint) =>
+    val sameDirection = List((x, crossProduct.x), (y, crossProduct.y), (z, crossProduct.z)).forall {
+      case (thisCoord, prodCoord) =>
         // Take the signs of corresponding coordinates
         val thisSign = thisCoord.signum
         val prodSign = prodCoord.signum
         // Either all entries must have the same signs, or the product must be the 0 vector
         prodSign == 0 || thisSign == prodSign
-      case _ =>
-        // TODO fail fast here?
-        false
     }
     // Return the angle if the cross product is in the same direction
     if(sameDirection) convexAngle
