@@ -20,6 +20,8 @@ object SphericalExample {
     val move1 = Move(Disk(Point(root3Over3, root3Over3, root3Over3), r), 3)
     // Make a puzzle with the two moves, and have it automatically cache all computations
     val puzzle = new LazyCachingPuzzle(move0, move1)
+    // If everything has gone correctly, there should be 22 parts
+    assert(puzzle.parts.size == 22)
     // Print out a permutation representation that GAP can read
     for(((_, permutation), index) <- puzzle.permutationStrings.zipWithIndex) {
       println("move" + index + " := AsPermutation(Transformation(" + permutation + "));")

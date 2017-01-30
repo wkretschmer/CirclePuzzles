@@ -22,6 +22,8 @@ object PlanarExample {
     val move1 = Move(Circle(Point(FixedPoint.One, FixedPoint.Zero), r), n)
     // Make a puzzle with the two moves, and have it automatically cache all computations
     val puzzle = new LazyCachingPuzzle(move0, move1)
+    // If everything has gone correctly, there should be 70 parts
+    assert(puzzle.parts.size == 70)
     // Print out a permutation representation that GAP can read
     for(((_, permutation), index) <- puzzle.permutationStrings.zipWithIndex) {
       println("move" + index + " := AsPermutation(Transformation(" + permutation + "));")
