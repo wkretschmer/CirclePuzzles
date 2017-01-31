@@ -126,6 +126,7 @@ trait GeometricPuzzle extends GeometricPart {
       * Note: this assumes that the boundary of all parts are nonintersecting continuous loops in the plane. This
       * assumption may be violated for puzzles that have disconnected moves, i.e. moves between which parts cannot be
       * exchanged. All other fields that depend on this may require the same assumption.
+      * @return All parts belonging to this puzzle, as defined by its cuts.
       */
     def parts: List[Part] = {
       // Map each arc intersection point to the set of arcs that start or end there. This is basically a graph where the
@@ -182,12 +183,14 @@ trait GeometricPuzzle extends GeometricPart {
 
     /**
       * Maps each part to a unique integer ID in the range `[0, parts.size)`.
+      * @return A map from parts to integer IDs.
       */
     def partIDs: Map[Part, Int] = parts.zipWithIndex.toMap
 
     /**
       * For each move, a list of `(move, map)` pairs where the map is from parts to parts, and represents the image
       * under that move of each part. Note that this ignores part orientation.
+      * @return For each move, the move's action on parts in this puzzle, represented as a map from parts to parts.
       */
     def partPermutations: List[(Move, Map[Part, Part])] = {
       movesList.map{move =>
@@ -200,6 +203,8 @@ trait GeometricPuzzle extends GeometricPart {
 
     /**
       * Like `partPermutations`, but the maps are instead in terms of the integer IDs in `partIDs`.
+      * @return For each move, the move's action on parts in this puzzle, represented as a map from part IDs to part
+      * IDs.
       */
     def idPermutations: List[(Move, Map[Int, Int])] = {
       for((move, permutation) <- partPermutations) yield {
@@ -214,6 +219,7 @@ trait GeometricPuzzle extends GeometricPart {
       * Like `partPermutations`, but the maps are turned into strings that GAP can interpret as a permutation using
       * `AsPermutation(Transformation(_))`. This also means that each ID is incremented by 1 to be in the range
       * `[1, parts.size]`.
+      * @return For each move, a string that can be parsed in GAP to interpret its action as a permutation.
       */
     def permutationStrings: List[(Move, String)] = {
       for((move, idPermutation) <- idPermutations) yield {
