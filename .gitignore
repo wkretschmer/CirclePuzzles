@@ -3,5 +3,10 @@
 *.iml
 out/
 
+# SBT
+project/project
+project/target
+target/
+
 # Room for local test code
-src/experimental/
+src/main/scala/experimental/
