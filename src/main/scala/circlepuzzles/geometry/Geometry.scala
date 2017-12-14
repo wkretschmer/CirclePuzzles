@@ -42,15 +42,22 @@ trait Geometry {
   /**
     * Base trait for points. Immutable.
     */
-  trait BasePoint extends Rotatable[Point] {
+  trait BasePoint {
     this: Point => // Every BasePoint must also be a Point
 
+    /**
+      * Rotate about the given point in the counterclockwise direction.
+      * @param rotationCenter Center of rotation.
+      * @param angle Angle of rotation.
+      * @return Image of this under the specified rotation.
+      */
+    def rotate(rotationCenter: Point, angle: Angle): Point
   }
 
   /**
     * Base trait for circles. Immutable.
     */
-  trait BaseCircle extends HasCenter with Rotatable[Circle] {
+  trait BaseCircle extends HasCenter {
     this: Circle => // Every BaseCircle must also be a Circle
 
     /**
@@ -64,12 +71,20 @@ trait Geometry {
       * @return Full set of arcs around this circle.
       */
     def fullArcs: ArcsOnCircle
+
+    /**
+      * Rotate about the given point in the counterclockwise direction.
+      * @param rotationCenter Center of rotation.
+      * @param angle Angle of rotation.
+      * @return Image of this under the specified rotation.
+      */
+    def rotate(rotationCenter: Point, angle: Angle): Circle
   }
 
   /**
     * Base trait for disks. Immutable.
     */
-  trait BaseDisk extends HasCircle with Rotatable[Disk] {
+  trait BaseDisk extends HasCircle {
     this: Disk => // Every BaseDisk must also be a Disk
 
     /**
@@ -93,12 +108,20 @@ trait Geometry {
       * @return True if and only if this disk strictly contains the given point.
       */
     def strictlyContains(pt: Point): Boolean = containsCompare(pt) < 0
+
+    /**
+      * Rotate about the given point in the counterclockwise direction.
+      * @param rotationCenter Center of rotation.
+      * @param angle Angle of rotation.
+      * @return Image of this under the specified rotation.
+      */
+    def rotate(rotationCenter: Point, angle: Angle): Disk
   }
 
   /**
     * Base trait for arcs. Immutable.
     */
-  trait BaseArc extends HasCircle with Rotatable[Arc] {
+  trait BaseArc extends HasCircle {
     this: Arc => // Every BaseArc must also be an Arc
 
     /**
@@ -127,12 +150,20 @@ trait Geometry {
       * @return Midpoint of this arc.
       */
     def midPoint: Point
+
+    /**
+      * Rotate about the given point in the counterclockwise direction.
+      * @param rotationCenter Center of rotation.
+      * @param angle Angle of rotation.
+      * @return Image of this under the specified rotation.
+      */
+    def rotate(rotationCenter: Point, angle: Angle): Arc
   }
 
   /**
     * Base trait for arcs on a circle. Immutable.
     */
-  trait BaseArcsOnCircle extends HasCircle with Rotatable[ArcsOnCircle] {
+  trait BaseArcsOnCircle extends HasCircle {
     this: ArcsOnCircle => // Every BaseArcsOnCircle must also be an ArcsOnCircle
 
     /**
@@ -161,22 +192,6 @@ trait Geometry {
       * @return True if and only if this arc collection is nonempty.
       */
     def nonEmpty: Boolean
-  }
-
-  // Shared traits for type members
-
-  /**
-    * Objects that can be rotated.
-    * @tparam T Type of images under rotations. This is usually the same type as whatever class implements this trait.
-    */
-  trait Rotatable[T <: Rotatable[T]] {
-    /**
-      * Rotate about the center of the given object in the counterclockwise direction.
-      * @param hasCenter Object whose center is the center of rotation.
-      * @param angle Angle of rotation.
-      * @return Image of this under the specified rotation.
-      */
-    def rotate(hasCenter: HasCenter, angle: Angle): T = rotate(hasCenter.center, angle)
 
     /**
       * Rotate about the given point in the counterclockwise direction.
@@ -184,8 +199,10 @@ trait Geometry {
       * @param angle Angle of rotation.
       * @return Image of this under the specified rotation.
       */
-    def rotate(rotationCenter: Point, angle: Angle): T
+    def rotate(rotationCenter: Point, angle: Angle): ArcsOnCircle
   }
+
+  // Shared traits for type members
 
   /**
     * Objects that have a well-defined center.

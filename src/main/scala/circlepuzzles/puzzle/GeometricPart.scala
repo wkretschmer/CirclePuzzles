@@ -106,7 +106,7 @@ trait GeometricPart extends GeometricMove {
       */
     def image(move: Move): Part = {
       if(rotatedBy(move.disk)) {
-        val rotatedBoundary = simplifiedBoundary.map(arc => arc.rotate(move.disk, move.angle))
+        val rotatedBoundary = simplifiedBoundary.map(arc => arc.rotate(move.disk.center, move.angle))
         new Part(rotatedBoundary)
       }
       else this

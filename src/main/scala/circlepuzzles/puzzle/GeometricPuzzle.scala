@@ -88,7 +88,7 @@ trait GeometricPuzzle extends GeometricPart {
               // Compute the image of the cuts under each repetition of this move
               for(angle <- move.nonzeroAngles) {
                 // Rotate the cuts by rotating the center and arcs by the angle
-                val rotatedArcs = intersection.rotate(move.disk, angle)
+                val rotatedArcs = intersection.rotate(move.disk.center, angle)
                 // Add the rotated arcs, and get any concentric, coradial arcs that were already computed
                 val existingArcs = add(rotatedArcs, allCuts)
                 // Compute the newly added arcs by subtracting the arcs we computed previously
