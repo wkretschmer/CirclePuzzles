@@ -68,16 +68,16 @@ case class Circle(override val center: Point, radius: FixedPoint) extends Planar
       Set.empty
     }
     else if(distToSum == 0) { // Circles separate and intersect at one point
-    // The point of intersection is at the angle between the centers
-    val thisAngle = atan2Mod2Pi(dy, dx)
+      // The point of intersection is at the angle between the centers
+      val thisAngle = atan2Mod2Pi(dy, dx)
       // The angle from the other center differs from thisAngle by pi; they are opposite angles
       val thatAngle = mod2Pi(thisAngle + Pi)
       Set((thisAngle, thatAngle))
     }
     else if(distToDiff == 0) { // Smaller circle contained in larger circle and circles intersect at one point
-    // The angle is the same from both centers
-    // This angle is also the angle from the center of the larger to the smaller circle
-    val angle = if(radius > that.radius) atan2Mod2Pi(dy, dx) else atan2Mod2Pi(-dy, -dx)
+      // The angle is the same from both centers
+      // This angle is also the angle from the center of the larger to the smaller circle
+      val angle = if(radius > that.radius) atan2Mod2Pi(dy, dx) else atan2Mod2Pi(-dy, -dx)
       Set((angle, angle))
     }
     else{
